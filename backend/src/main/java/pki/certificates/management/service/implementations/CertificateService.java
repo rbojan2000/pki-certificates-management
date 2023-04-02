@@ -22,7 +22,6 @@ import java.util.Date;
 @Service
 public class CertificateService implements ICertificateService {
 
-
     public static X509Certificate generateCertificate(Subject subject, Issuer issuer, Date startDate, Date endDate, String serialNumber) {
         try {
             //Posto klasa za generisanje sertifiakta ne moze da primi direktno privatni kljuc pravi se builder za objekat
