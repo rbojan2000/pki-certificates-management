@@ -1,2 +1,1 @@
-feature/abc_def /n
-bug/ghi_jkl
+feature/abc_def
