@@ -22,8 +22,7 @@ import java.util.Date;
 @Service
 public class CertificateService implements ICertificateService {
 
-    public static X509Certificate generateCertificate(Subject subject, Issuer issuer, Date startDate, Date endDate, String serialNumber) {
-        try {
+    public static X509Certificate generateCertificate(Subject subject, Issuer issuer, Date startDate, Date endDate, String serialNumber) throws CertificateException, OperatorCreationException {
             //Posto klasa za generisanje sertifiakta ne moze da primi direktno privatni kljuc pravi se builder za objekat
             //Ovaj objekat sadrzi privatni kljuc izdavaoca sertifikata i koristiti se za potpisivanje sertifikata
             //Parametar koji se prosledjuje je algoritam koji se koristi za potpisivanje sertifiakta
@@ -53,17 +52,12 @@ public class CertificateService implements ICertificateService {
             //Konvertuje objekat u sertifikat
             return certConverter.getCertificate(certHolder);
 
-        } catch (CertificateEncodingException e) {
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (IllegalStateException e) {
-            e.printStackTrace();
-        } catch (OperatorCreationException e) {
-            e.printStackTrace();
-        } catch (CertificateException e) {
-            e.printStackTrace();
-        }
+    }
+
+    @Override
+    public X509Certificate generateCertificate(Issuer issuer, String commonName, String organization, String organizationalUnit, String country, int validityDays) {
+
+
         return null;
     }
 }

@@ -1,4 +1,4 @@
-package pki.certificates.management.keystores;
+package pki.certificates.management.keystore;
 
 import org.springframework.stereotype.Component;
 
