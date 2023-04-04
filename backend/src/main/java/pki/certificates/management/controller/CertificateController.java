@@ -1,32 +1,33 @@
 package pki.certificates.management.controller;
 
 
-import java.math.BigInteger;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.SecureRandom;
-import java.security.Security;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.Date;
+
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
+import org.bouncycastle.crypto.agreement.srp.SRP6Util;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import pki.certificates.management.keystore.KeyStoreReader;
 import pki.certificates.management.keystore.KeyStoreWriter;
+import pki.certificates.management.model.Issuer;
+import java.security.cert.Certificate;
 
+import java.math.BigInteger;
 import java.security.*;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.Date;
 
 @RestController
 @RequestMapping("/api/certificate")
@@ -34,8 +35,14 @@ public class CertificateController {
 
     @PostMapping(path = "create")
     public ResponseEntity<?> createRootCertificate() throws NoSuchAlgorithmException, NoSuchProviderException, OperatorCreationException, CertificateException {
+        // Generiranje KeyPair-a
+        // Učitavanje privatnog ključa root sertifikata
+        KeyStoreReader keyStoreReader = new KeyStoreReader();
+        Issuer issuer = keyStoreReader.readIssuerFromStore("src/main/resources/static/root-keystore.jks", "my root CA", "password".toCharArray(), "password".toCharArray());
 
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        java.security.cert.Certificate loadedCertificate = keyStoreReader.readCertificate("src/main/resources/static/root-keystore.jks", "password", "my root CA");
+
+        X509Certificate rootCert = (X509Certificate) loadedCertificate;
 
         // Generiranje KeyPair-a
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA", "BC");
@@ -44,12 +51,12 @@ public class CertificateController {
 
         // Postavljanje podataka o vlasniku certifikata
         X500Name owner = new X500NameBuilder(BCStyle.INSTANCE)
-                .addRDN(BCStyle.CN, "My Root CA")
+                .addRDN(BCStyle.CN, "My Intermediate CA")
                 .addRDN(BCStyle.O, "My Organization")
                 .addRDN(BCStyle.OU, "My Unit")
-                .addRDN(BCStyle.L, "My City")
-                .addRDN(BCStyle.ST, "My State")
-                .addRDN(BCStyle.C, "US")
+                .addRDN(BCStyle.L, "Novi Sad")
+                .addRDN(BCStyle.ST, "Srbija")
+                .addRDN(BCStyle.C, "RS")
                 .build();
 
         // Postavljanje seriskog broja certifikata
@@ -59,9 +66,9 @@ public class CertificateController {
         Date notBefore = new Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000); // Jedan dan unazad
         Date notAfter = new Date(System.currentTimeMillis() + 365 * 24 * 60 * 60 * 1000); // Jedna godina unaprijed
 
-        // Kreiranje objekta JcaX509v3CertificateBuilder za generiranje self-signed sertifikata
+        // Kreiranje objekta JcaX509v3CertificateBuilder za generiranje intermediate sertifikata
         JcaX509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(
-                owner,
+                rootCert,
                 serialNumber,
                 notBefore,
                 notAfter,
@@ -69,9 +76,9 @@ public class CertificateController {
                 keyPair.getPublic());
 
         // Kreiranje ContentSigner-a za potpisivanje certifikata
-        ContentSigner signer = new JcaContentSignerBuilder("SHA256WithRSAEncryption").build(keyPair.getPrivate());
+        ContentSigner signer = new JcaContentSignerBuilder("SHA256WithRSAEncryption").build(issuer.getPrivateKey());
 
-        // Generiranje self-signed sertifikata
+        // Generiranje intermediate sertifikata
         X509CertificateHolder certHolder = certBuilder.build(signer);
         X509Certificate cert = new JcaX509CertificateConverter().getCertificate(certHolder);
 
@@ -80,19 +87,15 @@ public class CertificateController {
 
         KeyStoreWriter keyStoreWriter = new KeyStoreWriter();
 
+        // Inicijalizacija fajla za cuvanje sertifikata
+        System.out.println("Cuvanje certifikata u jks fajl:");
+        keyStoreWriter.loadKeyStore("src/main/resources/static/other-keystore.jks",  "password".toCharArray());
+        PrivateKey pk = keyPair.getPrivate();
+        keyStoreWriter.write("my intermediate CA", pk, "password".toCharArray(), cert);
+        keyStoreWriter.saveKeyStore("src/main/resources/static/other-keystore.jks",  "password".toCharArray());
 
-        keyStoreWriter.loadKeyStore("src/main/resources/static/root-keystore.jks",  "password".toCharArray());
+        return null;
 
-        // Upisujemo sertifikat u keystore
-        String alias = "my Root CA";
-        PrivateKey privateKey = keyPair.getPrivate();
-        keyStoreWriter.write(alias, privateKey, "password".toCharArray(), cert);
-
-// Čuvamo keystore fajl
-        keyStoreWriter.saveKeyStore("src/main/resources/static/root-keystore.jks",  "password".toCharArray());
-
-        System.out.println("Self-signed sertifikat je uspješno sačuvan u JKS fajl.");
-        return new ResponseEntity(HttpStatus.OK);
     }
 
     private KeyPair generateKeyPair() {
