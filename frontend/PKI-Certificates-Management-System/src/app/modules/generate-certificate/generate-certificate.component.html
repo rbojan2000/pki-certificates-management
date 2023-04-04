@@ -1,0 +1,59 @@
+<div class="container">
+    <form>
+      <h1>Generate Certificate</h1>
+      <div class="form-group">
+        <div class="form-column">
+          <label for="commonName">Common Name</label>
+          <input type="text" id="commonName" name="commonName" required>
+        </div>
+        <div class="form-column">
+          <label for="organization">Organization</label>
+          <input type="text" id="organization" name="organization" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-column">
+          <label for="organizationalUnit">Organizational Unit</label>
+          <input type="text" id="organizationalUnit" name="organizationalUnit" required>
+        </div>
+        <div class="form-column">
+          <label for="country">Country</label>
+          <input type="text" id="country" name="country" maxlength="2" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-column">
+          <label for="startDate">Start Date</label>
+          <input type="date" id="startDate" name="startDate" required>
+        </div>
+        <div class="form-column">
+          <label for="endDate">End Date</label>
+          <input type="date" id="endDate" name="endDate" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-column">
+          <label for="keySize">Key Size</label>
+          <select id="keySize" name="keySize" required>
+            <option value="2048">2048 bits</option>
+            <option value="4096">4096 bits</option>
+            <option value="8192">8192 bits</option>
+          </select>
+        </div>
+        <div class="form-column">
+          <label for="certificateType">Certificate Type</label>
+          <select id="certificateType" name="certificateType" required>
+            <option value="Root">Root Certificate</option>
+            <option value="Intermediate">Intermediate Certificate</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="privateKeyPassword">Private Key Password</label>
+        <input type="password" id="privateKeyPassword" name="privateKeyPassword" minlength="8" required>
+      </div>
+      <div class="form-group">
+        <input type="submit" value="Generate">
+      </div>
+    </form>
+  </div>

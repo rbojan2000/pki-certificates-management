@@ -1,4 +1,4 @@
-package pki.certificates.management.keystores;
+package pki.certificates.management.keystore;
 
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
