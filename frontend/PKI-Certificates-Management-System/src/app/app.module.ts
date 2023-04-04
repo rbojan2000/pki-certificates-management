@@ -7,10 +7,16 @@ import { NavbarComponent } from './modules/navbar/navbar.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { CreateKeyComponent } from './modules/create-key/create-key.component';
 import { ViewComponent } from './modules/view/view.component';
+import { MatCardModule } from '@angular/material/card';
 
 @NgModule({
-  declarations: [AppComponent, NavbarComponent, CreateKeyComponent, ViewComponent],
-  imports: [BrowserModule, NgbModule, AppRoutingModule],
+  declarations: [
+    AppComponent,
+    NavbarComponent,
+    CreateKeyComponent,
+    ViewComponent,
+  ],
+  imports: [BrowserModule, NgbModule, AppRoutingModule, MatCardModule],
   providers: [],
   bootstrap: [AppComponent],
 })

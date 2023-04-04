@@ -1,1 +1,15 @@
-<p>view works!</p>
+<div class="container" style="display: flex; flex-wrap: wrap; justify-content: space-evenly; margin-top: 20px;">
+  <div *ngFor="let certificate of certificates" style="flex: 0 0 calc(33.33% - 20px); margin: 10px;">
+    <mat-card class="mat-elevation-z19 border align card-background" style="padding: 10px;">
+      <div style="display: flex; flex-direction: column;">
+        <mat-card-content>Issuer: {{certificate.issuer}}</mat-card-content>
+        <mat-card-content>Subject: {{certificate.subject}}</mat-card-content>
+        <mat-card-content>Start date: {{certificate.startDate}}</mat-card-content>
+        <mat-card-content>End date: {{certificate.endDate}}</mat-card-content>
+      </div>
+      <div style="display: flex; justify-content: flex-end;">
+        <button class="btn btn-primary">Revoke</button>
+      </div>
+    </mat-card>
+  </div>
+</div>

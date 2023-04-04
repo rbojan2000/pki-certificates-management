@@ -1,0 +1,40 @@
+
+th.mat-sort-header-sorted {
+  color: black;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  }
+
+  mat-toolbar {
+    justify-content: space-between;
+}
+
+.content {
+    padding: 16px;
+}
+
+.content > mat-card {
+    margin-bottom: 16px;
+}
+
+.align{
+  width: 350px;
+  align-items: center;
+  padding-left: 50px;
+}
+
+.card-background{
+  background-color: #EDEDED;
+}
+
+
+.zoom {
+  transition: transform .2s; /* Animation */
+}
+
+.zoom:hover {
+  transform: scale(1.1); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
+}
