@@ -7,7 +7,7 @@ import { Certificate } from 'src/app/model/certificate';
   providedIn: 'root',
 })
 export class CertificateService {
-  apiHost: string = 'http://localhost:8081/';
+  apiHost: string = 'http://localhost:8080/';
   headers: HttpHeaders = new HttpHeaders({
     'Content-Type': 'application/json',
   });
@@ -15,7 +15,7 @@ export class CertificateService {
   constructor(private http: HttpClient) {}
 
   getCertificates(): Observable<Certificate[]> {
-    return this.http.get<Certificate[]>(this.apiHost + 'certificates/getAll', {
+    return this.http.get<Certificate[]>(this.apiHost + 'api/certificate', {
       headers: this.headers,
     });
   }

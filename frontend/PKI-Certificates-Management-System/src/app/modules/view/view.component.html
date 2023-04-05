@@ -1,15 +1,17 @@
-<div class="container" style="display: flex; flex-wrap: wrap; justify-content: space-evenly; margin-top: 20px;">
-  <div *ngFor="let certificate of certificates" style="flex: 0 0 calc(33.33% - 20px); margin: 10px;">
-    <mat-card class="mat-elevation-z19 border align card-background" style="padding: 10px;">
-      <div style="display: flex; flex-direction: column;">
-        <mat-card-content>Issuer: {{certificate.issuer}}</mat-card-content>
-        <mat-card-content>Subject: {{certificate.subject}}</mat-card-content>
-        <mat-card-content>Start date: {{certificate.startDate}}</mat-card-content>
-        <mat-card-content>End date: {{certificate.endDate}}</mat-card-content>
+<div class="certificates-container">
+  <div class="certificate-card" *ngFor="let certificate of certificates">
+    <div class="card-content">
+      <h5>CA: {{certificate.type}} </h5>
+      <h3 class="issuer">Issuer: {{certificate.issuer}}</h3>
+      <br />
+      <p class="subject">Subject: {{certificate.subject}}</p>
+    </div>
+    <div class="card-footer">
+      <div class="dates-container">
+        <p class="start-date">Start date: {{certificate.startDate}}</p>
+        <p class="end-date">End date: {{certificate.endDate }}</p>
       </div>
-      <div style="display: flex; justify-content: flex-end;">
-        <button class="btn btn-primary">Revoke</button>
-      </div>
-    </mat-card>
+      <button class="revoke-button">Revoke</button>
+    </div>
   </div>
 </div>

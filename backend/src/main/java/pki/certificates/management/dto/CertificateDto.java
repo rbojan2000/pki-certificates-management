@@ -1,9 +1,16 @@
 package pki.certificates.management.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
+@AllArgsConstructor
 public class CertificateDto {
-    private String subject;
-    private String issuer;
-    private String startDate;
-    private String endDate;
+    public String subject;
+    public String issuer;
+    public String startDate;
+    public String endDate;
+
+    public String type;
+
 
 }

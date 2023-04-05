@@ -1,36 +1,39 @@
 package pki.certificates.management.controller;
 
 
-
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
-import org.bouncycastle.crypto.agreement.srp.SRP6Util;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import pki.certificates.management.dto.CertificateDto;
 import pki.certificates.management.keystore.KeyStoreReader;
 import pki.certificates.management.keystore.KeyStoreWriter;
 import pki.certificates.management.model.Issuer;
-import java.security.cert.Certificate;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.math.BigInteger;
 import java.security.*;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/certificate")
+@CrossOrigin(origins = "http://localhost:4200")
 public class CertificateController {
 
     @PostMapping(path = "create")
@@ -96,6 +99,49 @@ public class CertificateController {
 
         return null;
 
+    }
+
+    @GetMapping
+    public List<CertificateDto> getAllCertificates() {
+        List<CertificateDto> returnCertifitcates = new ArrayList<>();
+        try {
+            File directory = new File("src/main/resources/static");
+            File[] files = directory.listFiles();
+
+            for (File file : files) {
+                if (file.isFile() && file.getName().endsWith(".jks")) {
+                    KeyStore keyStore = KeyStore.getInstance("JKS");
+                    FileInputStream fileInputStream = new FileInputStream(file);
+                    keyStore.load(fileInputStream, "password".toCharArray());
+
+                    Enumeration<String> aliases = keyStore.aliases();
+                    while (aliases.hasMoreElements()) {
+                        String alias = aliases.nextElement();
+                        Certificate certificate = keyStore.getCertificate(alias);
+
+                        if (certificate instanceof X509Certificate) {
+                            X509Certificate x509Certificate = (X509Certificate) certificate;
+
+                            String type = "";
+                            if(x509Certificate.getBasicConstraints() == 0){
+                                type = "FALSE";
+                            } else {
+                                type = "TRUE";
+                            }
+                            CertificateDto certificateDto = new CertificateDto(x509Certificate.getSubjectDN().getName(),
+                                    x509Certificate.getIssuerDN().getName(),
+                                    x509Certificate.getNotBefore().toString(),
+                                    x509Certificate.getNotAfter().toString(),
+                                    type);
+                            returnCertifitcates.add(certificateDto);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Greška pri učitavanju sertifikata.");
+        }
+        return returnCertifitcates;
     }
 
     private KeyPair generateKeyPair() {
