@@ -9,9 +9,9 @@
   }
   
   .container {
-    margin: 20px auto;
-    max-width: 800px;
-    padding: 20px;
+    margin: 15px auto;
+    max-width: 700px;
+    padding: 10px;
     border-radius: 5px;
     box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
   }
@@ -59,7 +59,7 @@
     color: #fff;
     cursor: pointer;
     font-size: 16px;
-    padding: 10px 20px;
+    padding: 7px 17px;
   }
   
   .form-group input[type="submit"]:hover {
@@ -72,3 +72,24 @@
     margin-top: 5px;
   }
   
+  .split {
+    height: 100%;
+    width: 50%;
+    position: fixed;
+    z-index: 1;
+    top: 5;
+    overflow-x: hidden;
+    margin-right: 0.3%;
+    margin-left: 0.3%;
+  
+  }
+  
+  /* Control the left side */
+  .left {
+    left: 0;
+  }
+  
+  /* Control the right side */
+  .right {
+    right: 0;
+  }

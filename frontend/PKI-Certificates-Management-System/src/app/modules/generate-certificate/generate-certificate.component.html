@@ -1,59 +1,113 @@
-<div class="container">
-    <form>
-      <h1>Generate Certificate</h1>
-      <div class="form-group">
-        <div class="form-column">
-          <label for="commonName">Common Name</label>
-          <input type="text" id="commonName" name="commonName" required>
+<div>
+  <div  class="split right">
+    <div class="container">
+      <form>
+        <h1>Subject :</h1>
+        <br>
+        <div class="form-group">
+          <div class="form-column">
+            <label for="certificateType">Certificate Type</label>
+            <select id="certificateType" name="certificateType" required>
+              <option value="Root">Root Certificate</option>
+              <option value="Intermediate">Intermediate Certificate</option>
+            </select>
+          </div>
+          <div class="form-column">
+            <label for="alias">Alias</label>
+            <input type="text" id="alias" name="alias" required>
+          </div>
         </div>
-        <div class="form-column">
-          <label for="organization">Organization</label>
-          <input type="text" id="organization" name="organization" required>
+        <div class="form-group">
+          <div class="form-column">
+            <label for="commonName">Common Name</label>
+            <input type="text" id="commonName" name="commonName" required>
+          </div>
+          <div class="form-column">
+            <label for="organization">Organization</label>
+            <input type="text" id="organization" name="organization" required>
+          </div>
         </div>
-      </div>
-      <div class="form-group">
-        <div class="form-column">
-          <label for="organizationalUnit">Organizational Unit</label>
-          <input type="text" id="organizationalUnit" name="organizationalUnit" required>
+        <div class="form-group">
+          <div class="form-column">
+            <label for="organizationalUnit">Organizational Unit</label>
+            <input type="text" id="organizationalUnit" name="organizationalUnit" required>
+          </div>
+          <div class="form-column">
+            <label for="country">Country</label>
+            <input type="text" id="country" name="country" maxlength="2" required>
+          </div>
         </div>
-        <div class="form-column">
-          <label for="country">Country</label>
-          <input type="text" id="country" name="country" maxlength="2" required>
-        </div>
-      </div>
-      <div class="form-group">
-        <div class="form-column">
-          <label for="startDate">Start Date</label>
-          <input type="date" id="startDate" name="startDate" required>
-        </div>
-        <div class="form-column">
-          <label for="endDate">End Date</label>
-          <input type="date" id="endDate" name="endDate" required>
-        </div>
-      </div>
-      <div class="form-group">
-        <div class="form-column">
-          <label for="keySize">Key Size</label>
-          <select id="keySize" name="keySize" required>
-            <option value="2048">2048 bits</option>
-            <option value="4096">4096 bits</option>
-            <option value="8192">8192 bits</option>
-          </select>
-        </div>
-        <div class="form-column">
-          <label for="certificateType">Certificate Type</label>
-          <select id="certificateType" name="certificateType" required>
-            <option value="Root">Root Certificate</option>
-            <option value="Intermediate">Intermediate Certificate</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="privateKeyPassword">Private Key Password</label>
-        <input type="password" id="privateKeyPassword" name="privateKeyPassword" minlength="8" required>
-      </div>
-      <div class="form-group">
-        <input type="submit" value="Generate">
-      </div>
-    </form>
+        <div class="form-group">
+          <div class="form-column">
+            <label for="startDate">Start Date</label>
+            <input type="date" id="startDate" name="startDate" required>
+          </div>
+          <div class="form-column">
+            <label for="endDate">End Date</label>
+            <input type="date" id="endDate" name="endDate" required>
+          </div>
+        </div>  
+      </form>
+    </div>
   </div>
+  
+  <div class="split left">
+    <div class="container">
+      <form>
+        <h1>Issuer :</h1>
+        <br>
+        <div class="form-group">
+          <div class="form-column">
+            <label for="keySize">Choose cert</label>
+            <select id="keySize" name="keySize" required>
+              <option value="2048">My root ca</option>
+              <option value="2048">My intermediate ca</option>           
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="form-column">
+            <label for="certificateType">Certificate Type</label>
+              <input style="background-color: #D3D3D3;" readonly="true" type="text" id="certType" name="certType">
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="form-column">
+            <label for="commonName">Common Name</label>
+            <input style="background-color: #D3D3D3;" readonly="true" type="text" id="commonName" name="commonName">
+          </div>
+          <div class="form-column">
+            <label for="organization">Organization</label>
+            <input readonly="true" type="text" id="organization" name="organization" style="background-color: #D3D3D3;" >
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="form-column">
+            <label for="organizationalUnit">Organizational Unit</label>
+            <input readonly="true" type="text" id="organizationalUnit" style="background-color: #D3D3D3;" name="organizationalUnit" required>
+          </div>
+          <div class="form-column">
+            <label for="country">Country</label>
+            <input readonly="true" style="background-color: #D3D3D3;" type="text" id="country" name="country" maxlength="2" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="form-column">
+            <label for="startDate">Start Date</label>
+            <input style="background-color: #D3D3D3;" type="date" readonly="true" id="startDate" name="startDate" required>
+          </div>
+          <div class="form-column">
+            <label for="endDate">End Date</label>
+            <input style="background-color: #D3D3D3;" type="date" readonly="true" id="endDate" name="endDate" required>
+          </div>
+        </div>
+        <div class="form-group">
+
+        </div>
+        <div class="form-group">
+          
+        </div>
+      </form>
+    </div>
+  </div>  
+</div>

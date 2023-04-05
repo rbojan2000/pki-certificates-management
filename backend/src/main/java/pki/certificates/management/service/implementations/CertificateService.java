@@ -1,63 +1,110 @@
 package pki.certificates.management.service.implementations;
 
 import org.springframework.stereotype.Service;
-import pki.certificates.management.model.Issuer;
-import pki.certificates.management.model.Subject;
+import pki.certificates.management.dto.CertificateDto;
 import pki.certificates.management.service.interfaces.ICertificateService;
 
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.X509v3CertificateBuilder;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
-import org.bouncycastle.operator.ContentSigner;
-import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-
-import java.math.BigInteger;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.security.KeyStore;
+import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
-import java.util.Date;
+import java.util.*;
 
 @Service
 public class CertificateService implements ICertificateService {
 
-    public static X509Certificate generateCertificate(Subject subject, Issuer issuer, Date startDate, Date endDate, String serialNumber) throws CertificateException, OperatorCreationException {
-            //Posto klasa za generisanje sertifiakta ne moze da primi direktno privatni kljuc pravi se builder za objekat
-            //Ovaj objekat sadrzi privatni kljuc izdavaoca sertifikata i koristiti se za potpisivanje sertifikata
-            //Parametar koji se prosledjuje je algoritam koji se koristi za potpisivanje sertifiakta
-            JcaContentSignerBuilder builder = new JcaContentSignerBuilder("SHA256WithRSAEncryption");
-            //Takodje se navodi koji provider se koristi, u ovom slucaju Bouncy Castle
-            builder = builder.setProvider("BC");
-
-            //Formira se objekat koji ce sadrzati privatni kljuc i koji ce se koristiti za potpisivanje sertifikata
-            ContentSigner contentSigner = builder.build(issuer.getPrivateKey());
-
-            //Postavljaju se podaci za generisanje sertifiakta
-            X509v3CertificateBuilder certGen = new JcaX509v3CertificateBuilder(issuer.getX500Name(),
-                    new BigInteger(serialNumber),
-                    startDate,
-                    endDate,
-                    subject.getX500Name(),
-                    subject.getPublicKey());
-
-            //Generise se sertifikat
-            X509CertificateHolder certHolder = certGen.build(contentSigner);
-
-            //Builder generise sertifikat kao objekat klase X509CertificateHolder
-            //Nakon toga je potrebno certHolder konvertovati u sertifikat, za sta se koristi certConverter
-            JcaX509CertificateConverter certConverter = new JcaX509CertificateConverter();
-            certConverter = certConverter.setProvider("BC");
-
-            //Konvertuje objekat u sertifikat
-            return certConverter.getCertificate(certHolder);
-
+    @Override
+    public List<CertificateDto> getAllCertificates() {
+        List<Certificate> certificates = getAllCertificatesFromKeyStores();
+        return mapCertificatesToDtos(certificates, null);
     }
 
     @Override
-    public X509Certificate generateCertificate(Issuer issuer, String commonName, String organization, String organizationalUnit, String country, int validityDays) {
+    public List<CertificateDto> getCertificatesByAliases(List<String> aliases) {
+        List<Certificate> certificates = getCertificatesByAliasesFromKeyStores(aliases);
+        return mapCertificatesToDtos(certificates, aliases);
+    }
 
+    private List<Certificate> getAllCertificatesFromKeyStores() {
+        List<Certificate> certificates = new ArrayList<>();
+        try {
+            File directory = new File("src/main/resources/static");
+            File[] files = directory.listFiles();
 
-        return null;
+            for (File file : files) {
+                if (file.isFile() && file.getName().endsWith(".jks")) {
+                    KeyStore keyStore = KeyStore.getInstance("JKS");
+                    FileInputStream fileInputStream = new FileInputStream(file);
+                    keyStore.load(fileInputStream, "password".toCharArray());
+
+                    Enumeration<String> aliases = keyStore.aliases();
+                    while (aliases.hasMoreElements()) {
+                        String alias = aliases.nextElement();
+                        Certificate certificate = keyStore.getCertificate(alias);
+
+                        if (certificate instanceof X509Certificate) {
+                            certificates.add(certificate);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Greška pri učitavanju sertifikata.");
+        }
+        return certificates;
+    }
+
+    private List<Certificate> getCertificatesByAliasesFromKeyStores(List<String> aliases) {
+        List<Certificate> certificates = new ArrayList<>();
+        try {
+            File directory = new File("src/main/resources/static");
+            File[] files = directory.listFiles();
+
+            for (File file : files) {
+                if (file.isFile() && file.getName().endsWith(".jks")) {
+                    KeyStore keyStore = KeyStore.getInstance("JKS");
+                    FileInputStream fileInputStream = new FileInputStream(file);
+                    keyStore.load(fileInputStream, "password".toCharArray());
+
+                    Enumeration<String> aliases2 = keyStore.aliases();
+                    while (aliases2.hasMoreElements()) {
+                        String alias = aliases2.nextElement();
+                        Certificate certificate = keyStore.getCertificate(alias);
+
+                        if (certificate instanceof X509Certificate && aliases.contains(alias)) {
+                            certificates.add(certificate);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Greška pri učitavanju sertifikata.");
+        }
+        return certificates;
+    }
+
+    private List<CertificateDto> mapCertificatesToDtos(List<Certificate> certificates, List<String> aliases) {
+        List<CertificateDto> dtos = new ArrayList<>();
+        int i = 0;
+        for (Certificate certificate : certificates) {
+            if (certificate instanceof X509Certificate) {
+                X509Certificate x509Certificate = (X509Certificate) certificate;
+
+                String type = x509Certificate.getBasicConstraints() == 0 ? "FALSE" : "TRUE";
+                String alias = aliases == null ? null : aliases.get(i);
+                CertificateDto dto = new CertificateDto(
+                        x509Certificate.getSubjectDN().getName(),
+                        x509Certificate.getIssuerDN().getName(),
+                        x509Certificate.getNotBefore().toString(),
+                        x509Certificate.getNotAfter().toString(),
+                        type,
+                        alias
+                );
+                dtos.add(dto);
+                i++;
+            }
+        }
+        return dtos;
     }
 }
