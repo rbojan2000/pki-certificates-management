@@ -12,6 +12,7 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pki.certificates.management.dto.CertificateDto;
@@ -132,7 +133,8 @@ public class CertificateController {
                                     x509Certificate.getIssuerDN().getName(),
                                     x509Certificate.getNotBefore().toString(),
                                     x509Certificate.getNotAfter().toString(),
-                                    type);
+                                    type,
+                                    alias);
                             returnCertifitcates.add(certificateDto);
                         }
                     }
@@ -144,6 +146,10 @@ public class CertificateController {
         return returnCertifitcates;
     }
 
+    @PutMapping(value = "/{alias}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @CrossOrigin(origins = "http://localhost:4200")
+    public void revokeCertificate(@PathVariable String alias){
+    }
     private KeyPair generateKeyPair() {
         try {
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");

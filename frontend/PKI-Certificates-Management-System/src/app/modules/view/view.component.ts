@@ -17,4 +17,8 @@ export class ViewComponent implements OnInit {
       this.certificates = res;
     });
   }
+
+  revokeCertificate(alias: string) {
+    this.certificateService.revokeCertificate(alias).subscribe();
+  }
 }
