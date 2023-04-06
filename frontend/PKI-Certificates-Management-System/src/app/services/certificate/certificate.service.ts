@@ -20,6 +20,12 @@ export class CertificateService {
     });
   }
 
+  getCertificatesByUserId(userId: string): Observable<Certificate[]> {
+    return this.http.get<Certificate[]>(this.apiHost + 'api/user/getUserCertificates/' + userId, {
+      headers: this.headers,
+    });
+  }
+
   revokeCertificate(alias: string): any {
     let params = new HttpParams();
     params = params.append('alias', alias);
