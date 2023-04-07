@@ -20,5 +20,6 @@ export class ViewComponent implements OnInit {
 
   revokeCertificate(alias: string) {
     this.certificateService.revokeCertificate(alias).subscribe();
+    location.reload();
   }
 }

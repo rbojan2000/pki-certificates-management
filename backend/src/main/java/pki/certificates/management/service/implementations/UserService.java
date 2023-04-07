@@ -2,13 +2,14 @@ package pki.certificates.management.service.implementations;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import pki.certificates.management.dto.UserCertificateDto;
 import pki.certificates.management.dto.CertificateDto;
 import pki.certificates.management.model.User;
 import pki.certificates.management.repository.UserRepository;
 import pki.certificates.management.service.interfaces.IUserService;
-
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
 
 @Service
 public class UserService implements IUserService {
@@ -22,8 +23,9 @@ public class UserService implements IUserService {
     @Override
     public List<CertificateDto> userCertificates(String userID) {
         User user = userRepository.findById(userID).get();
-        List<CertificateDto> certs =  certificateService.getCertificatesByAliases(user.getCerts());
-
+        List<CertificateDto> certs =  certificateService.getCertificatesByAliases(user.getCerts().stream()
+                .map(UserCertificateDto::getAlias)
+                .collect(Collectors.toList()));
         return certs;
     }
 

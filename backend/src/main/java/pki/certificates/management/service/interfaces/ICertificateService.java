@@ -11,4 +11,6 @@ public interface ICertificateService {
 
     public List<CertificateDto> getAllCertificates();
     public List<CertificateDto> getCertificatesByAliases(List<String> aliases);
+
+    public void revokeCertificate(String alias);
 }
