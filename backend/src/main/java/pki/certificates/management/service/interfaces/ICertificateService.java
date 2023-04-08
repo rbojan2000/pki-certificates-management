@@ -1,14 +1,23 @@
 package pki.certificates.management.service.interfaces;
 
-import pki.certificates.management.dto.CertificateDto;
-import pki.certificates.management.model.Issuer;
+import org.bouncycastle.operator.OperatorCreationException;
+import pki.certificates.management.dto.CertificateDTO;
+import pki.certificates.management.dto.CreateCertificateDTO;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.text.ParseException;
 import java.util.List;
 
 public interface ICertificateService {
 
-    public List<CertificateDto> getAllCertificates();
-    public List<CertificateDto> getCertificatesByAliases(List<String> aliases);
+    public List<CertificateDTO> getAllCertificates();
+    public List<CertificateDTO> getCertificatesByAliases(List<String> aliases);
+    public X509Certificate createEndEntityOrIntermediateCertificate(CreateCertificateDTO createCertificateDTO) throws  IOException, CertificateException, OperatorCreationException, ParseException;
+
 }

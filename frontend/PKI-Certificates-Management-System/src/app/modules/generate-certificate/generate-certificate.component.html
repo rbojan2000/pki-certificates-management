@@ -7,9 +7,9 @@
         <div class="form-group">
           <div class="form-column">
             <label for="certificateType">Certificate Authority</label>
-            <select id="certificateType" name="certificateType" required>
-              <option value="Root">TRUE</option>
-              <option value="Intermediate">FALSE</option>
+            <select [(ngModel)]="selectedAuthority" id="certificateType" name="certificateType" required>
+              <option value="true">TRUE</option>
+              <option value="false">FALSE</option>
             </select>
           </div>
           
@@ -27,7 +27,7 @@
         <div class="form-group">
           <div class="form-column">
             <label for="organizationalUnit">Organizational Unit</label>
-            <input type="text" id="organizationalUnit" name="organizationalUnit" [(ngModel)]="subjectO" required>
+            <input type="text" id="organizationalUnit" name="organizationalUnit" [(ngModel)]="subjectOU" required>
           </div>
           <div class="form-column">
             <label for="country">Country</label>
@@ -37,11 +37,11 @@
         <div class="form-group">
           <div class="form-column">
             <label for="startDate">Start Date</label>
-            <input type="date" id="startDate" name="startDate" required>
+            <input [(ngModel)]="startDate" type="date" id="startDate" name="startDate" required>
           </div>
           <div class="form-column">
             <label for="endDate">End Date</label>
-            <input type="date" id="endDate" name="endDate" required>
+            <input [(ngModel)]="endDate" type="date" id="endDate" name="endDate" required>
           </div>
         </div>  
         
@@ -49,7 +49,7 @@
     </div>
 
     <div style="margin-left: 40%; margin-top: 8%;" class="form-group">
-      <input style="width: 150px; height: 60px;" type="submit">
+      <input style="width: 150px; height: 60px;" (click)="createCertificate()" type="submit">
     </div>
   </div>
   <div class="split left">
@@ -69,7 +69,7 @@
         <div class="form-group">
           <div class="form-column">
             <label for="certificateType">Certification Authority</label>
-            <input  [(ngModel)]="selectedTemp" style="background-color: #D3D3D3;"  type="text" id="selCertType" name="certType" >
+            <input  [(ngModel)]="selectedTemp" style="background-color: #D3D3D3;"  type="text" id="selCertType" name="certType" readonly="true" >
           </div>
         </div>
         <div class="form-group">

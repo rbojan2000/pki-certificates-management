@@ -61,6 +61,14 @@
     font-size: 16px;
     padding: 7px 17px;
   }
+  .toast-container {
+    top: 80px;
+  }
+  
+  .toast {
+    background-color: #ff0000;
+    color: #ffffff;
+  }
   
   .form-group input[type="submit"]:hover {
     background-color: #198775;
