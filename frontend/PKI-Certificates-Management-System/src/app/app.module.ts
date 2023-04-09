@@ -12,7 +12,8 @@ import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastrModule } from 'ngx-toastr';
-import { ToastrService } from 'ngx-toastr';
+import { GenerateRootCertificateComponent } from './modules/generate-root-certificate/generate-root-certificate.component';
+import { MyCertificatesComponent } from './modules/my-certificates/my-certificates.component';
 
 @NgModule({
   declarations: [
@@ -20,6 +21,8 @@ import { ToastrService } from 'ngx-toastr';
     NavbarComponent,
     ViewComponent,
     GenerateCertificateComponent,
+    GenerateRootCertificateComponent,
+    MyCertificatesComponent,
   ],
   imports: [
     BrowserAnimationsModule,

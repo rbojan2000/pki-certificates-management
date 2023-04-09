@@ -15,18 +15,22 @@ public class UserService implements IUserService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private CertificateService certificateService;
-
-    @Override
-    public List<CertificateDTO> userCertificates(String userID) {
-        User user = userRepository.findById(userID).get();
-        return  certificateService.getCertificatesByAliases(user.getCerts());
-
-    }
-
     @Override
     public User createUser(User user) {
         return userRepository.save(user);
+    }
+
+    @Override
+    public User getUserByID(String userID) {
+        return userRepository.findById(userID).get();
+    }
+
+    @Override
+    public void assignCertificateToUser(String alias, String userID) {
+        User user = userRepository.findById(userID).get();
+        List<String> certs = user.getCerts();
+        certs.add(alias);
+        user.setCerts(certs);
+        userRepository.save(user);
     }
 }

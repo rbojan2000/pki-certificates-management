@@ -99,7 +99,7 @@ export class GenerateCertificateComponent implements OnInit {
     let endDateMs = Date.parse(this.endDate);
     let selectedEndDateMs = this.parseDate(this.selectedEndDate).getTime();
 
-    if (startDateMs > selectedStartDateMs && endDateMs < selectedEndDateMs && startDateMs > Date.now() && startDateMs < selectedEndDateMs && endDateMs > startDateMs) {
+    if (startDateMs > selectedStartDateMs && endDateMs < selectedEndDateMs && startDateMs > Date.now() - 86400000 && startDateMs < selectedEndDateMs && endDateMs > startDateMs) {
       this.certificateService.createCertificate(certificateDTO).subscribe();
     }
     else {

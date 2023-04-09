@@ -2,3 +2,8 @@
   width: 100%;
   justify-content: center;
 }
+
+.nav-link.active {
+  text-decoration: underline;
+  
+}

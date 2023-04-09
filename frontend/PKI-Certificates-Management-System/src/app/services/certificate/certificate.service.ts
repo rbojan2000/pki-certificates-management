@@ -7,7 +7,6 @@ import { Certificate } from 'src/app/model/certificate';
   providedIn: 'root',
 })
 export class CertificateService {
-
   apiHost: string = 'http://localhost:8080/';
   headers: HttpHeaders = new HttpHeaders({
     'Content-Type': 'application/json',
@@ -22,10 +21,13 @@ export class CertificateService {
   }
 
   getCertificatesByUserId(): Observable<Certificate[]> {
-    var userID = "642dafe9d9e299372bb8c612";
-    return this.http.get<Certificate[]>(this.apiHost + 'api/user/getUserCertificates/' + userID, {
-      headers: this.headers,
-    });
+    var userID = '642dafe9d9e299372bb8c612';
+    return this.http.get<Certificate[]>(
+      this.apiHost + 'api/certificate/getUserCertificates/' + userID,
+      {
+        headers: this.headers,
+      }
+    );
   }
 
   revokeCertificate(alias: string): any {
@@ -35,14 +37,22 @@ export class CertificateService {
   }
 
   createCertificate(createCertificateDTO: any) {
-    window.alert(JSON.stringify(createCertificateDTO))
     return this.http.post<any>(
       this.apiHost + 'api/certificate/create',
       JSON.stringify(createCertificateDTO),
       {
         headers: this.headers,
       }
-    ); 
+    );
   }
 
+  createRootCertificate(certificateDTO: any) {
+    return this.http.post<any>(
+      this.apiHost + 'api/certificate/createRoot',
+      JSON.stringify(certificateDTO),
+      {
+        headers: this.headers,
+      }
+    );
+  }
 }

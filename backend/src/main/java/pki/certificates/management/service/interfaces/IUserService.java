@@ -6,8 +6,10 @@ import pki.certificates.management.model.User;
 import java.util.List;
 
 public interface IUserService {
-    public List<CertificateDTO> userCertificates(String userID);
 
     public User createUser(User user);
 
+    public User getUserByID(String userID);
+
+    void assignCertificateToUser(String alias, String userID);
 }

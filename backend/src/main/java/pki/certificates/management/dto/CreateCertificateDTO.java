@@ -13,4 +13,5 @@ public class CreateCertificateDTO {
     public String startDate;
     public String endDate;
     public String selectedAuthority;
+    public String userID;
 }

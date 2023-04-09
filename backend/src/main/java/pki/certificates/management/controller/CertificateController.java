@@ -9,6 +9,8 @@ import pki.certificates.management.dto.CreateCertificateDTO;
 import pki.certificates.management.service.implementations.CertificateService;
 
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.text.ParseException;
@@ -23,14 +25,26 @@ public class CertificateController {
     CertificateService certificateService;
 
     @PostMapping(path = "create")
-    public ResponseEntity<Void> createEndEntityOrIntermediateCertificate(@RequestBody CreateCertificateDTO createCertificateDTO) throws UnrecoverableKeyException, CertificateException, IOException, OperatorCreationException, ParseException {
-
+    public ResponseEntity<Void> createEndEntityOrIntermediateCertificate(@RequestBody CreateCertificateDTO createCertificateDTO) throws CertificateException, IOException, OperatorCreationException, ParseException {
         certificateService.createEndEntityOrIntermediateCertificate(createCertificateDTO);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping(path = "createRoot")
+    public ResponseEntity<Void> createRoot(@RequestBody CreateCertificateDTO createCertificateDTO) throws  CertificateException, IOException, OperatorCreationException, ParseException, NoSuchAlgorithmException, NoSuchProviderException {
+        certificateService.createRootCertificate(createCertificateDTO);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping
     public List<CertificateDTO> getAllCertificates() {
         return certificateService.getAllCertificates();
+
+    }
+
+    @GetMapping(path = "/getUserCertificates/{userID}")
+    public List<CertificateDTO> getUserCertificates(@PathVariable("userID") String userID) {
+
+        return certificateService.userCertificates(userID);
     }
 }
