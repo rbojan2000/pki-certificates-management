@@ -2,7 +2,6 @@ package pki.certificates.management.service.implementations;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import pki.certificates.management.dto.CertificateDTO;
 import pki.certificates.management.model.User;
 import pki.certificates.management.repository.UserRepository;
 import pki.certificates.management.service.interfaces.IUserService;

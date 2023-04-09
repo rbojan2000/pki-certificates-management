@@ -5,12 +5,9 @@ import org.bouncycastle.operator.OperatorCreationException;
 import pki.certificates.management.dto.CertificateDTO;
 import pki.certificates.management.dto.CreateCertificateDTO;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;

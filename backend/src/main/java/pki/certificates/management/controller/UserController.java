@@ -3,12 +3,8 @@ package pki.certificates.management.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pki.certificates.management.dto.CertificateDTO;
 import pki.certificates.management.model.User;
 import pki.certificates.management.service.implementations.UserService;
-
-import java.util.List;
-
 
 @RestController
 @RequestMapping("/api/user")
