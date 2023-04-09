@@ -7,6 +7,7 @@ export class Certificate {
   endDate: string;
   type: string;
   alias: string;
+  isRevoked: boolean;
 
   constructor(
     issuer: string,
@@ -14,7 +15,8 @@ export class Certificate {
     startDate: string,
     endDate: string,
     type: string,
-    alias: string
+    alias: string,
+    isRevoked: boolean
   ) {
     this.issuer = issuer;
     this.subject = subject;
@@ -22,5 +24,6 @@ export class Certificate {
     this.endDate = endDate;
     this.type = type;
     this.alias = alias;
+    this.isRevoked = isRevoked;
   }
 }
