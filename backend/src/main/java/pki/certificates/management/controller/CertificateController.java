@@ -11,7 +11,6 @@ import pki.certificates.management.service.implementations.CertificateService;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.text.ParseException;
 import java.util.List;
@@ -31,7 +30,7 @@ public class CertificateController {
     }
 
     @PostMapping(path = "createRoot")
-    public ResponseEntity<Void> createRoot(@RequestBody CreateCertificateDTO createCertificateDTO) throws  CertificateException, IOException, OperatorCreationException, ParseException, NoSuchAlgorithmException, NoSuchProviderException {
+    public ResponseEntity<Void> createRoot(@RequestBody CreateCertificateDTO createCertificateDTO) throws CertificateException, IOException, OperatorCreationException, ParseException, NoSuchAlgorithmException, NoSuchProviderException {
         certificateService.createRootCertificate(createCertificateDTO);
         return ResponseEntity.ok().build();
     }
@@ -39,12 +38,10 @@ public class CertificateController {
     @GetMapping
     public List<CertificateDTO> getAllCertificates() {
         return certificateService.getAllCertificates();
-
     }
 
     @GetMapping(path = "/getUserCertificates/{userID}")
     public List<CertificateDTO> getUserCertificates(@PathVariable("userID") String userID) {
-
         return certificateService.userCertificates(userID);
     }
 }

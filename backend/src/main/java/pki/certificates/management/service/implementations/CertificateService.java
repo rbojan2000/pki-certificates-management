@@ -48,6 +48,10 @@ public class CertificateService implements ICertificateService {
     @Autowired
     UserService userService;
 
+    public static String generateAlias(String companyName) {
+        UUID uuid = UUID.randomUUID();
+        return companyName.trim().replaceAll("\\s+", "").concat("-").concat(uuid.toString().replace("-", ""));
+    }
 
     @Override
     public List<CertificateDTO> getAllCertificates() {
@@ -62,37 +66,24 @@ public class CertificateService implements ICertificateService {
     }
 
     @Override
-    public X509Certificate createEndEntityOrIntermediateCertificate(CreateCertificateDTO createCertificateDTO) throws  IOException, CertificateException, OperatorCreationException, ParseException {
+    public X509Certificate createEndEntityOrIntermediateCertificate(CreateCertificateDTO createCertificateDTO) throws IOException, CertificateException, OperatorCreationException, ParseException {
 
         // Generate subject
-        Subject subject = generateSubject(createCertificateDTO.subjectCN, createCertificateDTO.subjectO,
-                createCertificateDTO.subjectOU, createCertificateDTO.subjectUN, createCertificateDTO.subjectCountry);
+        Subject subject = generateSubject(createCertificateDTO.subjectCN, createCertificateDTO.subjectO, createCertificateDTO.subjectOU, createCertificateDTO.subjectUN, createCertificateDTO.subjectCountry);
 
         Issuer issuer = new Issuer();
 
         try {
-            issuer = keyStoreReader.readIssuerFromStore("src/main/resources/static/root-keystore.jks",
-                    createCertificateDTO.aliasIssuer, "password".toCharArray(), "password".toCharArray());
+            issuer = keyStoreReader.readIssuerFromStore("src/main/resources/static/root-keystore.jks", createCertificateDTO.aliasIssuer, "password".toCharArray(), "password".toCharArray());
         } catch (Exception e) {
-            issuer = keyStoreReader.readIssuerFromStore("src/main/resources/static/other-keystore.jks",
-                    createCertificateDTO.aliasIssuer, "password".toCharArray(), "password".toCharArray());
+            issuer = keyStoreReader.readIssuerFromStore("src/main/resources/static/other-keystore.jks", createCertificateDTO.aliasIssuer, "password".toCharArray(), "password".toCharArray());
 
         }
 
-        ContentSigner contentSigner = new JcaContentSignerBuilder("SHA256WithRSAEncryption")
-                .setProvider("BC")
-                .build(issuer.getPrivateKey());
+        ContentSigner contentSigner = new JcaContentSignerBuilder("SHA256WithRSAEncryption").setProvider("BC").build(issuer.getPrivateKey());
 
         // Create certificate generator
-        X509v3CertificateBuilder certGen = new JcaX509v3CertificateBuilder(issuer.getX500Name(),
-                new BigInteger(128, new SecureRandom()),
-                parseDate(createCertificateDTO.startDate),
-                parseDate(createCertificateDTO.endDate),
-                subject.getX500Name(),
-                subject.getPublicKey()
-        )
-            .addExtension(Extension.basicConstraints, Boolean.valueOf(createCertificateDTO.selectedAuthority), new BasicConstraints(Boolean.valueOf(createCertificateDTO.selectedAuthority)))
-            .addExtension(Extension.keyUsage, Boolean.valueOf(createCertificateDTO.selectedAuthority), new KeyUsage(KeyUsage.keyCertSign));
+        X509v3CertificateBuilder certGen = new JcaX509v3CertificateBuilder(issuer.getX500Name(), new BigInteger(128, new SecureRandom()), parseDate(createCertificateDTO.startDate), parseDate(createCertificateDTO.endDate), subject.getX500Name(), subject.getPublicKey()).addExtension(Extension.basicConstraints, Boolean.valueOf(createCertificateDTO.selectedAuthority), new BasicConstraints(Boolean.valueOf(createCertificateDTO.selectedAuthority))).addExtension(Extension.keyUsage, Boolean.valueOf(createCertificateDTO.selectedAuthority), new KeyUsage(KeyUsage.keyCertSign));
 
         // Generate certificate holder
         X509CertificateHolder certHolder = certGen.build(contentSigner);
@@ -107,16 +98,13 @@ public class CertificateService implements ICertificateService {
         keyStoreWriter.write(alias, issuer.getPrivateKey(), "password".toCharArray(), certificate);
         keyStoreWriter.saveKeyStore("src/main/resources/static/other-keystore.jks", "password".toCharArray());
 
-        userService.assignCertificateToUser(alias, createCertificateDTO.userID);
-
         return certificate;
     }
 
     @Override
     public X509Certificate createRootCertificate(CreateCertificateDTO createCertificateDTO) throws NoSuchAlgorithmException, NoSuchProviderException, OperatorCreationException, ParseException, CertIOException, CertificateException {
         // Generate subject
-        Subject subject = generateSubject(createCertificateDTO.subjectCN, createCertificateDTO.subjectO,
-                createCertificateDTO.subjectOU, createCertificateDTO.subjectUN, createCertificateDTO.subjectCountry);
+        Subject subject = generateSubject(createCertificateDTO.subjectCN, createCertificateDTO.subjectO, createCertificateDTO.subjectOU, createCertificateDTO.subjectUN, createCertificateDTO.subjectCountry);
 
         // Generate key pair
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA", "BC");
@@ -124,21 +112,10 @@ public class CertificateService implements ICertificateService {
         KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
         // Create content signer
-        ContentSigner contentSigner = new JcaContentSignerBuilder("SHA256WithRSAEncryption")
-                .setProvider("BC")
-                .build(keyPair.getPrivate());
+        ContentSigner contentSigner = new JcaContentSignerBuilder("SHA256WithRSAEncryption").setProvider("BC").build(keyPair.getPrivate());
 
         // Create certificate generator
-        X509v3CertificateBuilder certGen = new JcaX509v3CertificateBuilder(
-                subject.getX500Name(),
-                new BigInteger(128, new SecureRandom()),
-                parseDate(createCertificateDTO.startDate),
-                parseDate(createCertificateDTO.endDate),
-                subject.getX500Name(),
-                keyPair.getPublic()
-        )
-            .addExtension(Extension.basicConstraints, true, new BasicConstraints(true))
-            .addExtension(Extension.keyUsage, true, new KeyUsage(KeyUsage.keyCertSign));
+        X509v3CertificateBuilder certGen = new JcaX509v3CertificateBuilder(subject.getX500Name(), new BigInteger(128, new SecureRandom()), parseDate(createCertificateDTO.startDate), parseDate(createCertificateDTO.endDate), subject.getX500Name(), keyPair.getPublic()).addExtension(Extension.basicConstraints, true, new BasicConstraints(true)).addExtension(Extension.keyUsage, true, new KeyUsage(KeyUsage.keyCertSign));
 
         // Generate certificate holder
         X509CertificateHolder certHolder = certGen.build(contentSigner);
@@ -166,7 +143,7 @@ public class CertificateService implements ICertificateService {
         User user = userService.getUserByID(userID);
         return getCertificatesByAliases(user.getCerts());
 
-   }
+    }
 
     private List<Certificate> getAllCertificatesFromKeyStores() {
         List<Certificate> certificates = new ArrayList<>();
@@ -196,7 +173,6 @@ public class CertificateService implements ICertificateService {
         }
         return certificates;
     }
-
 
     private List<Certificate> getCertificatesByAliasesFromKeyStores(List<String> aliases) {
         List<Certificate> certificates = new ArrayList<>();
@@ -232,19 +208,11 @@ public class CertificateService implements ICertificateService {
         List<CertificateDTO> dtos = new ArrayList<>();
         int i = 0;
         for (Certificate certificate : certificates) {
-            if (certificate instanceof X509Certificate) {
-                X509Certificate x509Certificate = (X509Certificate) certificate;
+            if (certificate instanceof X509Certificate x509Certificate) {
 
-                String type = x509Certificate.getBasicConstraints() == 0 ? "FALSE" : "TRUE";
+                String type = x509Certificate.getBasicConstraints() != -1 ? "TRUE" : "FALSE";
                 String alias = aliases == null ? null : aliases.get(i);
-                CertificateDTO dto = new CertificateDTO(
-                        x509Certificate.getSubjectDN().getName(),
-                        x509Certificate.getIssuerDN().getName(),
-                        x509Certificate.getNotBefore().toString(),
-                        x509Certificate.getNotAfter().toString(),
-                        type,
-                        alias
-                );
+                CertificateDTO dto = new CertificateDTO(x509Certificate.getSubjectDN().getName(), x509Certificate.getIssuerDN().getName(), x509Certificate.getNotBefore().toString(), x509Certificate.getNotAfter().toString(), type, alias);
                 dtos.add(dto);
                 i++;
             }
@@ -279,17 +247,8 @@ public class CertificateService implements ICertificateService {
         return null;
     }
 
-
-
     private Date parseDate(String date) throws ParseException {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         return format.parse(date);
     }
-
-    public static String generateAlias(String companyName) {
-        UUID uuid = UUID.randomUUID();
-        return companyName.trim().replaceAll("\\s+", "").concat("-").concat(uuid.toString().replace("-", ""));
-    }
-
-
 }

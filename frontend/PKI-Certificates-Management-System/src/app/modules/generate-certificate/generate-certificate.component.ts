@@ -30,14 +30,15 @@ export class GenerateCertificateComponent implements OnInit {
   public startDate: any;
   public endDate: any;
 
-  constructor(private certificateService: CertificateService, private toastr: ToastrService) {}
+  constructor(
+    private certificateService: CertificateService,
+    private toastr: ToastrService
+  ) {}
 
   ngOnInit(): void {
-    this.certificateService
-      .getCertificatesByUserId()
-      .subscribe((res: any) => {
-        this.certificates = res;
-      });
+    this.certificateService.getCertificatesByUserId().subscribe((res: any) => {
+      this.certificates = res;
+    });
   }
 
   findCertificateByAlias(alias: string): Certificate | undefined {
@@ -91,7 +92,7 @@ export class GenerateCertificateComponent implements OnInit {
       subjectCountry: this.subjectCountry,
       startDate: this.startDate,
       endDate: this.endDate,
-      selectedAuthority: this.selectedAuthority
+      selectedAuthority: this.selectedAuthority,
     };
 
     let selectedStartDateMs = this.parseDate(this.selectedStartDate).getTime();
@@ -99,25 +100,39 @@ export class GenerateCertificateComponent implements OnInit {
     let endDateMs = Date.parse(this.endDate);
     let selectedEndDateMs = this.parseDate(this.selectedEndDate).getTime();
 
-    if (startDateMs > selectedStartDateMs && endDateMs < selectedEndDateMs && startDateMs > Date.now() - 86400000 && startDateMs < selectedEndDateMs && endDateMs > startDateMs) {
+    if (
+      startDateMs > selectedStartDateMs &&
+      endDateMs < selectedEndDateMs &&
+      startDateMs > Date.now() - 86400000 &&
+      startDateMs < selectedEndDateMs &&
+      endDateMs > startDateMs
+    ) {
       this.certificateService.createCertificate(certificateDTO).subscribe();
+    } else {
+      window.alert('Wrong date!');
     }
-    else {
-      window.alert('Wrong date!')
-    }
-    
   }
-
 
   parseDate(dateStr: string): Date {
     const months: { [key: string]: number } = {
-      Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
-      Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11
+      Jan: 0,
+      Feb: 1,
+      Mar: 2,
+      Apr: 3,
+      May: 4,
+      Jun: 5,
+      Jul: 6,
+      Aug: 7,
+      Sep: 8,
+      Oct: 9,
+      Nov: 10,
+      Dec: 11,
     };
-  
-    const [dayOfWeek, monthStr, dayOfMonth, time, timeZone, year] = dateStr.split(' ');
+
+    const [dayOfWeek, monthStr, dayOfMonth, time, timeZone, year] =
+      dateStr.split(' ');
     const [hours, minutes, seconds] = time.split(':');
-  
+
     const date = new Date();
     date.setUTCFullYear(Number(year));
     date.setUTCMonth(months[monthStr]);
@@ -125,7 +140,7 @@ export class GenerateCertificateComponent implements OnInit {
     date.setUTCHours(Number(hours));
     date.setUTCMinutes(Number(minutes));
     date.setUTCSeconds(Number(seconds));
-  
+
     return date;
   }
 }

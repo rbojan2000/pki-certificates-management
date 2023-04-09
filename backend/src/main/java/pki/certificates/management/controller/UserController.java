@@ -20,10 +20,8 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<String> createUser(@RequestParam("name") String name, @RequestParam("email") String email) {
-
         return ResponseEntity.ok("Korisnik " + name + " sa email adresom " + email + " je uspešno dodat!");
     }
-
 
     @GetMapping(path = "/getUser/{userID}")
     public User getUserByID(@PathVariable("userID") String userID) {

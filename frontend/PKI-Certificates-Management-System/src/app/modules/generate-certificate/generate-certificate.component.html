@@ -1,114 +1,215 @@
 <div>
-  <div  class="split right">
+  <div class="split right">
     <div class="container">
       <form>
         <h1>Subject :</h1>
-        <br>
+        <br />
         <div class="form-group">
           <div class="form-column">
             <label for="certificateType">Certificate Authority</label>
-            <select [(ngModel)]="selectedAuthority" id="certificateType" name="certificateType" required>
+            <select
+              [(ngModel)]="selectedAuthority"
+              id="certificateType"
+              name="certificateType"
+              required
+            >
               <option value="true">TRUE</option>
               <option value="false">FALSE</option>
             </select>
           </div>
-          
         </div>
         <div class="form-group">
           <div class="form-column">
             <label for="commonName">Common Name</label>
-            <input type="text" id="commonName" name="commonName"  [(ngModel)]="subjectCN" required>
+            <input
+              type="text"
+              id="commonName"
+              name="commonName"
+              [(ngModel)]="subjectCN"
+              required
+            />
           </div>
           <div class="form-column">
             <label for="organization">Organization</label>
-            <input type="text" id="organization" name="organization" [(ngModel)]="subjectO" required>
+            <input
+              type="text"
+              id="organization"
+              name="organization"
+              [(ngModel)]="subjectO"
+              required
+            />
           </div>
         </div>
         <div class="form-group">
           <div class="form-column">
             <label for="organizationalUnit">Organizational Unit</label>
-            <input type="text" id="organizationalUnit" name="organizationalUnit" [(ngModel)]="subjectOU" required>
+            <input
+              type="text"
+              id="organizationalUnit"
+              name="organizationalUnit"
+              [(ngModel)]="subjectOU"
+              required
+            />
           </div>
           <div class="form-column">
             <label for="country">Country</label>
-            <input type="text" id="country" name="country" maxlength="2" [(ngModel)]="subjectCountry" required>
+            <input
+              type="text"
+              id="country"
+              name="country"
+              maxlength="2"
+              [(ngModel)]="subjectCountry"
+              required
+            />
           </div>
         </div>
         <div class="form-group">
           <div class="form-column">
             <label for="startDate">Start Date</label>
-            <input [(ngModel)]="startDate" type="date" id="startDate" name="startDate" required>
+            <input
+              [(ngModel)]="startDate"
+              type="date"
+              id="startDate"
+              name="startDate"
+              required
+            />
           </div>
           <div class="form-column">
             <label for="endDate">End Date</label>
-            <input [(ngModel)]="endDate" type="date" id="endDate" name="endDate" required>
+            <input
+              [(ngModel)]="endDate"
+              type="date"
+              id="endDate"
+              name="endDate"
+              required
+            />
           </div>
-        </div>  
-        
+        </div>
       </form>
     </div>
 
-    <div style="margin-left: 40%; margin-top: 8%;" class="form-group">
-      <input style="width: 150px; height: 60px;" (click)="createCertificate()" type="submit">
+    <div style="margin-left: 40%; margin-top: 8%" class="form-group">
+      <input
+        style="width: 150px; height: 60px"
+        (click)="createCertificate()"
+        type="submit"
+      />
     </div>
   </div>
   <div class="split left">
     <div class="container">
       <form>
         <h1>Issuer :</h1>
-        <br>
+        <br />
         <div class="form-group">
           <div class="form-column">
             <label for="keySize">Choose cert</label>
-            <select [(ngModel)]="selectedKeySize"  (change)="onSelectionChanged()" id="keySize" name="keySize" required>
-              <option *ngFor="let cert of certificates"  [value]="cert.alias">{{ cert.alias }}</option>    
-           
+            <select
+              [(ngModel)]="selectedKeySize"
+              (change)="onSelectionChanged()"
+              id="keySize"
+              name="keySize"
+              required
+            >
+              <option *ngFor="let cert of certificates" [value]="cert.alias">
+                {{ cert.alias }}
+              </option>
             </select>
           </div>
         </div>
         <div class="form-group">
           <div class="form-column">
             <label for="certificateType">Certification Authority</label>
-            <input  [(ngModel)]="selectedTemp" style="background-color: #D3D3D3;"  type="text" id="selCertType" name="certType" readonly="true" >
+            <input
+              [(ngModel)]="selectedTemp"
+              style="background-color: #d3d3d3"
+              type="text"
+              id="selCertType"
+              name="certType"
+              readonly="true"
+            />
           </div>
         </div>
         <div class="form-group">
           <div class="form-column">
             <label for="commonName">Common Name</label>
-            <input style="background-color: #D3D3D3;" readonly="true" type="text" id="commonName" name="commonName" [(ngModel)]="selectedCN">
+            <input
+              style="background-color: #d3d3d3"
+              readonly="true"
+              type="text"
+              id="commonName"
+              name="commonName"
+              [(ngModel)]="selectedCN"
+            />
           </div>
           <div class="form-column">
             <label for="organization">Organization</label>
-            <input readonly="true" type="text" id="organization" name="organization" style="background-color: #D3D3D3;" [(ngModel)]="selectedO" >
+            <input
+              readonly="true"
+              type="text"
+              id="organization"
+              name="organization"
+              style="background-color: #d3d3d3"
+              [(ngModel)]="selectedO"
+            />
           </div>
         </div>
         <div class="form-group">
           <div class="form-column">
             <label for="organizationalUnit">Organizational Unit</label>
-            <input readonly="true" type="text" id="organizationalUnit" style="background-color: #D3D3D3;" name="organizationalUnit" [(ngModel)]="selecltedOU" required>
+            <input
+              readonly="true"
+              type="text"
+              id="organizationalUnit"
+              style="background-color: #d3d3d3"
+              name="organizationalUnit"
+              [(ngModel)]="selecltedOU"
+              required
+            />
           </div>
           <div class="form-column">
             <label for="country">Country</label>
-            <input readonly="true" style="background-color: #D3D3D3;" type="text" id="country" name="country" maxlength="2"  [(ngModel)]="selectedST" required>
+            <input
+              readonly="true"
+              style="background-color: #d3d3d3"
+              type="text"
+              id="country"
+              name="country"
+              maxlength="2"
+              [(ngModel)]="selectedST"
+              required
+            />
           </div>
         </div>
         <div class="form-group">
           <div class="form-column">
             <label for="startDate">Start Date</label>
-            <input style="background-color: #D3D3D3;" type="text" readonly="true" id="startDate" name="startDate" [(ngModel)]="selectedStartDate" required>
+            <input
+              style="background-color: #d3d3d3"
+              type="text"
+              readonly="true"
+              id="startDate"
+              name="startDate"
+              [(ngModel)]="selectedStartDate"
+              required
+            />
           </div>
           <div class="form-column">
             <label for="endDate">End Date</label>
-            <input style="background-color: #D3D3D3;" type="text" readonly="true" id="endDate" name="endDate"  [(ngModel)]="selectedEndDate" required>
+            <input
+              style="background-color: #d3d3d3"
+              type="text"
+              readonly="true"
+              id="endDate"
+              name="endDate"
+              [(ngModel)]="selectedEndDate"
+              required
+            />
           </div>
         </div>
-        <div class="form-group">
-
-        </div>
-        <div class="form-group">
-          
-        </div>
+        <div class="form-group"></div>
+        <div class="form-group"></div>
       </form>
     </div>
-  </div>  
+  </div>
 </div>
