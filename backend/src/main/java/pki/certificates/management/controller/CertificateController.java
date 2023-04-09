@@ -1,14 +1,18 @@
 package pki.certificates.management.controller;
 
-
 import org.bouncycastle.operator.OperatorCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pki.certificates.management.dto.CertificateDto;
+import pki.certificates.management.dto.CertificateDTO;
+import pki.certificates.management.dto.CreateCertificateDTO;
 import pki.certificates.management.service.implementations.CertificateService;
-import java.security.*;
+
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
+import java.text.ParseException;
 import java.util.List;
 
 @RestController
@@ -21,34 +25,34 @@ public class CertificateController {
 
 
     @PostMapping(path = "create")
-    public ResponseEntity<?> createRootCertificate() throws NoSuchAlgorithmException, NoSuchProviderException, OperatorCreationException, CertificateException {
-        return null;
 
+    public ResponseEntity<Void> createEndEntityOrIntermediateCertificate(@RequestBody CreateCertificateDTO createCertificateDTO) throws CertificateException, IOException, OperatorCreationException, ParseException {
+        certificateService.createEndEntityOrIntermediateCertificate(createCertificateDTO);
+        return ResponseEntity.ok().build();
     }
 
-    private KeyPair generateKeyPair() {
-        try {
-            KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-            SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
-            keyGen.initialize(2048, random);
-            return keyGen.generateKeyPair();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (NoSuchProviderException e) {
-            e.printStackTrace();
-        }
-        return null;
+    @PostMapping(path = "createRoot")
+    public ResponseEntity<Void> createRoot (@RequestBody CreateCertificateDTO createCertificateDTO) throws
+    CertificateException, IOException, OperatorCreationException, ParseException, NoSuchAlgorithmException, NoSuchProviderException
+    {
+        certificateService.createRootCertificate(createCertificateDTO);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping
-    public List<CertificateDto> getAllCertificates() {
+    public List<CertificateDTO> getAllCertificates () {
         return certificateService.getAllCertificates();
     }
 
+    @GetMapping(path = "/getUserCertificates/{userID}")
+    public List<CertificateDTO> getUserCertificates (@PathVariable("userID") String userID) {
+        return certificateService.userCertificates(userID);
+    }
 
     @GetMapping(path = "/revoke/{alias}")
     @CrossOrigin(origins = "http://localhost:4200")
-    public void revokeCertificate(@PathVariable String alias) {
+    public void revokeCertificate (@PathVariable String alias){
         certificateService.revokeCertificate(alias);
     }
+
 }

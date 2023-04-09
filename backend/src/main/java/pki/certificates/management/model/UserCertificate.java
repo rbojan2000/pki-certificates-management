@@ -1,4 +1,4 @@
-package pki.certificates.management.dto;
+package pki.certificates.management.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserCertificateDto {
+public class UserCertificate {
     public String alias;
     public boolean isRevoked;
 }

@@ -2,14 +2,12 @@ package pki.certificates.management.service.implementations;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import pki.certificates.management.dto.UserCertificateDto;
-import pki.certificates.management.dto.CertificateDto;
+
 import pki.certificates.management.model.User;
+import pki.certificates.management.model.UserCertificate;
 import pki.certificates.management.repository.UserRepository;
 import pki.certificates.management.service.interfaces.IUserService;
 import java.util.List;
-import java.util.stream.Collectors;
-
 
 @Service
 public class UserService implements IUserService {
@@ -17,20 +15,38 @@ public class UserService implements IUserService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private CertificateService certificateService;
-
-    @Override
-    public List<CertificateDto> userCertificates(String userID) {
-        User user = userRepository.findById(userID).get();
-        List<CertificateDto> certs =  certificateService.getCertificatesByAliases(user.getCerts().stream()
-                .map(UserCertificateDto::getAlias)
-                .collect(Collectors.toList()));
-        return certs;
-    }
 
     @Override
     public User createUser(User user) {
         return userRepository.save(user);
+    }
+
+    @Override
+    public User getUserByID(String userID) {
+        return userRepository.findById(userID).get();
+    }
+
+    @Override
+    public void assignCertificateToUser(String alias, String userID) {
+        User user = userRepository.findById(userID).get();
+        List<UserCertificate> certs = user.getCerts();
+        certs.add(new UserCertificate(alias, false));
+        user.setCerts(certs);
+        userRepository.save(user);
+    }
+
+    @Override
+    public User findByCertsAlias(String alias) {
+        return userRepository.findByCertsAlias(alias);
+    }
+
+    @Override
+    public void updateUser(User user) {
+        userRepository.save(user);
+    }
+
+    @Override
+    public List<User> findAll() {
+        return userRepository.findAll();
     }
 }

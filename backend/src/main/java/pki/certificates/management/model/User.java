@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import pki.certificates.management.dto.UserCertificateDto;
 
 import java.util.List;
 
@@ -23,5 +22,5 @@ public class User {
         private String Unit;
         private String State;
         private String City;
-        private List<UserCertificateDto> certs;
+        private List<UserCertificate> certs;
 }

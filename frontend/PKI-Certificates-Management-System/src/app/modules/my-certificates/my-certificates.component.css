@@ -1,0 +1,75 @@
+.certificates-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    margin-top: 20px;
+  }
+  
+  .certificate-card {
+    flex: 0 0 calc(50% - 20px); /* promenjeno sa 33.33% */
+    margin: 10px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  
+  @media screen and (min-width: 768px) { /* dodat novi media query */
+    .certificate-card {
+      flex: 0 0 calc(33.33% - 20px); /* vraćeno na 33.33% za širine ekrana veće od 768px */
+    }
+  }
+  
+  .card-header {
+    background-color: #f2f2f2;
+    color: #666;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .issuer, .subject {
+    margin: 0;
+    font-weight: bold;
+    font-size: 18px;
+  }
+  
+  .card-content {
+    padding: 10px;
+  }
+  
+  .dates-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+  }
+  
+  .start-date,
+  .end-date {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .card-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    background-color: #f2f2f2;
+    padding: 10px;
+    margin-top: 10px;
+  }
+  
+  .revoke-button {
+    background-color: #008080;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-left: auto;
+  }
+  
+  .revoke-button:hover {
+    background-color: #006666;
+  }
+  
