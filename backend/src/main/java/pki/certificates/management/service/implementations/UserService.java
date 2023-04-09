@@ -2,10 +2,11 @@ package pki.certificates.management.service.implementations;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import pki.certificates.management.model.User;
+import pki.certificates.management.model.UserCertificate;
 import pki.certificates.management.repository.UserRepository;
 import pki.certificates.management.service.interfaces.IUserService;
-
 import java.util.List;
 
 @Service
@@ -13,6 +14,7 @@ public class UserService implements IUserService {
 
     @Autowired
     private UserRepository userRepository;
+
 
     @Override
     public User createUser(User user) {
@@ -27,9 +29,24 @@ public class UserService implements IUserService {
     @Override
     public void assignCertificateToUser(String alias, String userID) {
         User user = userRepository.findById(userID).get();
-        List<String> certs = user.getCerts();
-        certs.add(alias);
+        List<UserCertificate> certs = user.getCerts();
+        certs.add(new UserCertificate(alias, false));
         user.setCerts(certs);
         userRepository.save(user);
+    }
+
+    @Override
+    public User findByCertsAlias(String alias) {
+        return userRepository.findByCertsAlias(alias);
+    }
+
+    @Override
+    public void updateUser(User user) {
+        userRepository.save(user);
+    }
+
+    @Override
+    public List<User> findAll() {
+        return userRepository.findAll();
     }
 }

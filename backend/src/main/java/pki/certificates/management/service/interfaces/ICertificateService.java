@@ -21,4 +21,6 @@ public interface ICertificateService {
     public X509Certificate createRootCertificate(CreateCertificateDTO createCertificateDTO) throws NoSuchAlgorithmException, NoSuchProviderException, OperatorCreationException, ParseException, CertIOException, CertificateException;
 
     List<CertificateDTO> userCertificates(String userID);
+
+    public void revokeCertificate(String alias);
 }

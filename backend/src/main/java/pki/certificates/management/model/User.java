@@ -22,5 +22,5 @@ public class User {
         private String Unit;
         private String State;
         private String City;
-        private List<String> certs;
+        private List<UserCertificate> certs;
 }

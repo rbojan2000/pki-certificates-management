@@ -23,25 +23,36 @@ public class CertificateController {
     @Autowired
     CertificateService certificateService;
 
+
     @PostMapping(path = "create")
+
     public ResponseEntity<Void> createEndEntityOrIntermediateCertificate(@RequestBody CreateCertificateDTO createCertificateDTO) throws CertificateException, IOException, OperatorCreationException, ParseException {
         certificateService.createEndEntityOrIntermediateCertificate(createCertificateDTO);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping(path = "createRoot")
-    public ResponseEntity<Void> createRoot(@RequestBody CreateCertificateDTO createCertificateDTO) throws CertificateException, IOException, OperatorCreationException, ParseException, NoSuchAlgorithmException, NoSuchProviderException {
+    public ResponseEntity<Void> createRoot (@RequestBody CreateCertificateDTO createCertificateDTO) throws
+    CertificateException, IOException, OperatorCreationException, ParseException, NoSuchAlgorithmException, NoSuchProviderException
+    {
         certificateService.createRootCertificate(createCertificateDTO);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping
-    public List<CertificateDTO> getAllCertificates() {
+    public List<CertificateDTO> getAllCertificates () {
         return certificateService.getAllCertificates();
     }
 
     @GetMapping(path = "/getUserCertificates/{userID}")
-    public List<CertificateDTO> getUserCertificates(@PathVariable("userID") String userID) {
+    public List<CertificateDTO> getUserCertificates (@PathVariable("userID") String userID) {
         return certificateService.userCertificates(userID);
     }
+
+    @GetMapping(path = "/revoke/{alias}")
+    @CrossOrigin(origins = "http://localhost:4200")
+    public void revokeCertificate (@PathVariable String alias){
+        certificateService.revokeCertificate(alias);
+    }
+
 }

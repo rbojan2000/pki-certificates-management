@@ -22,6 +22,8 @@ import pki.certificates.management.keystore.KeyStoreWriter;
 import pki.certificates.management.model.Issuer;
 import pki.certificates.management.model.Subject;
 import pki.certificates.management.model.User;
+
+import pki.certificates.management.model.UserCertificate;
 import pki.certificates.management.service.interfaces.ICertificateService;
 
 import java.io.File;
@@ -35,6 +37,7 @@ import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class CertificateService implements ICertificateService {
@@ -56,7 +59,8 @@ public class CertificateService implements ICertificateService {
     @Override
     public List<CertificateDTO> getAllCertificates() {
         List<Certificate> certificates = getAllCertificatesFromKeyStores();
-        return mapCertificatesToDtos(certificates, null);
+        List<String> aliases = getAliasesFromKeyStore();
+        return mapCertificatesToDtos(certificates, aliases);
     }
 
     @Override
@@ -139,10 +143,21 @@ public class CertificateService implements ICertificateService {
 
     @Override
     public List<CertificateDTO> userCertificates(String userID) {
-
         User user = userService.getUserByID(userID);
-        return getCertificatesByAliases(user.getCerts());
+        List<CertificateDTO> certs =  getCertificatesByAliases(user.getCerts().stream()
+                .map(UserCertificate::getAlias)
+                .collect(Collectors.toList()));
+        return certs;
+    }
 
+    public void revokeCertificate(String alias) {
+        User user = userService.findByCertsAlias(alias);
+        user.getCerts().stream()
+                .filter(userCertificateDto -> userCertificateDto.getAlias().equals(alias))
+                .findFirst()
+                .ifPresent(userCertificateDto -> userCertificateDto.setRevoked(true));
+
+        userService.updateUser(user);
     }
 
     private List<Certificate> getAllCertificatesFromKeyStores() {
@@ -158,9 +173,13 @@ public class CertificateService implements ICertificateService {
                     keyStore.load(fileInputStream, "password".toCharArray());
 
                     Enumeration<String> aliases = keyStore.aliases();
+
                     while (aliases.hasMoreElements()) {
                         String alias = aliases.nextElement();
                         Certificate certificate = keyStore.getCertificate(alias);
+
+//                        boolean hasMatchingCert = getNonRevokedCerts(userService.findAll()).stream()
+//                                .anyMatch(cert -> cert.getAlias().equals(alias));
 
                         if (certificate instanceof X509Certificate) {
                             certificates.add(certificate);
@@ -172,6 +191,39 @@ public class CertificateService implements ICertificateService {
             System.out.println("Greška pri učitavanju sertifikata.");
         }
         return certificates;
+    }
+
+    private static List<UserCertificate> getNonRevokedCerts(List<User> users) {
+        return users.stream()
+                .flatMap(user -> user.getCerts().stream())
+                .filter(cert -> !cert.isRevoked())
+                .map(cert -> new UserCertificate(cert.getAlias(), cert.isRevoked()))
+                .collect(Collectors.toList());
+    }
+
+    private List<String> getAliasesFromKeyStore() {
+        List<String> retAliases = new ArrayList<>();
+        try {
+            File directory = new File("src/main/resources/static");
+            File[] files = directory.listFiles();
+
+            for (File file : files) {
+                if (file.isFile() && file.getName().endsWith(".jks")) {
+                    KeyStore keyStore = KeyStore.getInstance("JKS");
+                    FileInputStream fileInputStream = new FileInputStream(file);
+                    keyStore.load(fileInputStream, "password".toCharArray());
+
+                    Enumeration<String> aliases = keyStore.aliases();
+                    while (aliases.hasMoreElements()) {
+                        String element = aliases.nextElement();
+                        retAliases.add(element);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Greška pri učitavanju sertifikata.");
+        }
+        return retAliases;
     }
 
     private List<Certificate> getCertificatesByAliasesFromKeyStores(List<String> aliases) {
@@ -210,7 +262,7 @@ public class CertificateService implements ICertificateService {
         for (Certificate certificate : certificates) {
             if (certificate instanceof X509Certificate x509Certificate) {
 
-                String type = x509Certificate.getBasicConstraints() != -1 ? "TRUE" : "FALSE";
+                String type = x509Certificate.getBasicConstraints() < 0 ? "FALSE" : "TRUE";
                 String alias = aliases == null ? null : aliases.get(i);
                 CertificateDTO dto = new CertificateDTO(x509Certificate.getSubjectDN().getName(), x509Certificate.getIssuerDN().getName(), x509Certificate.getNotBefore().toString(), x509Certificate.getNotAfter().toString(), type, alias);
                 dtos.add(dto);
