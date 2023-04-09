@@ -8,6 +8,7 @@ import java.util.List;
 public interface IUserService {
     public List<CertificateDto> userCertificates(String userID);
 
+
     public User createUser(User user);
 
 }

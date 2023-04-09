@@ -27,8 +27,8 @@ export class CertificateService {
   }
 
   revokeCertificate(alias: string): any {
-    let params = new HttpParams();
-    params = params.append('alias', alias);
-    return this.http.put(this.apiHost + 'api/certificate/' + alias, {});
+    return this.http.get(this.apiHost + 'api/certificate/revoke/' + alias, {
+      headers: this.headers,
+    });
   }
 }
