@@ -9,6 +9,7 @@ import { ViewComponent } from './modules/view/view.component';
 import { GenerateCertificateComponent } from './modules/generate-certificate/generate-certificate.component';
 import { MatCardModule } from '@angular/material/card';
 import { HttpClientModule } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -18,6 +19,7 @@ import { HttpClientModule } from '@angular/common/http';
     GenerateCertificateComponent,
   ],
   imports: [
+    FormsModule,
     BrowserModule,
     NgbModule,
     AppRoutingModule,
