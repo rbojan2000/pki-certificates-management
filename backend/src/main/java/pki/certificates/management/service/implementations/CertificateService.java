@@ -148,8 +148,7 @@ public class CertificateService implements ICertificateService {
             if (certificate instanceof X509Certificate) {
                 X509Certificate x509Certificate = (X509Certificate) certificate;
 
-
-                String type = x509Certificate.getBasicConstraints() == 0 ? "FALSE" : "TRUE";
+                String type = x509Certificate.getBasicConstraints() < 0 ? "FALSE" : "TRUE";
                 String alias = aliases == null ? null : aliases.get(i);
                 CertificateDto dto = new CertificateDto(
                         x509Certificate.getSubjectDN().getName(),

@@ -31,7 +31,6 @@ public class CertificateController {
 
     @PostMapping(path = "create")
     public ResponseEntity<?> createRootCertificate() throws NoSuchAlgorithmException, NoSuchProviderException, OperatorCreationException, CertificateException {
-
         return null;
     }
 
