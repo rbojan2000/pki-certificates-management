@@ -1,0 +1,103 @@
+<div>
+  <div class="container">
+    <form>
+      <h1>Root certificate</h1>
+      <br />
+      <div class="form-group">
+        <div class="form-column">
+          <label for="commonName">Certificate Authority</label>
+          <input
+            type="text"
+            style="background-color: #d3d3d3"
+            id="commonName"
+            name="commonName"
+            value="TRUE"
+            readonly="true"
+            required
+          />
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-column">
+          <label for="commonName">Common Name</label>
+          <input
+            type="text"
+            id="commonName"
+            name="commonName"
+            [(ngModel)]="subjectCN"
+            required
+          />
+        </div>
+        <div class="form-column">
+          <label for="organization">Organization</label>
+          <input
+            style="background-color: #d3d3d3"
+            type="text"
+            id="organization"
+            name="organization"
+            readonly="true"
+            [(ngModel)]="subjectO"
+            required
+          />
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-column">
+          <label for="organizationalUnit">Organizational Unit</label>
+          <input
+            type="text"
+            readonly="true"
+            style="background-color: #d3d3d3"
+            id="organizationalUnit"
+            name="organizationalUnit"
+            [(ngModel)]="subjectOU"
+            required
+          />
+        </div>
+        <div class="form-column">
+          <label for="country">Country</label>
+          <input
+            type="text"
+            id="country"
+            name="country"
+            readonly="true"
+            style="background-color: #d3d3d3"
+            maxlength="2"
+            [(ngModel)]="subjectCountry"
+            required
+          />
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-column">
+          <label for="startDate">Start Date</label>
+          <input
+            [(ngModel)]="startDate"
+            type="date"
+            id="startDate"
+            name="startDate"
+            required
+          />
+        </div>
+        <div class="form-column">
+          <label for="endDate">End Date</label>
+          <input
+            [(ngModel)]="endDate"
+            type="date"
+            id="endDate"
+            name="endDate"
+            required
+          />
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div style="margin-left: 43%; margin-top: 4%" class="form-group">
+    <input
+      style="width: 150px; height: 60px"
+      (click)="createCertificate()"
+      type="submit"
+    />
+  </div>
+</div>

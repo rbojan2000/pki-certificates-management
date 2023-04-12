@@ -10,6 +10,10 @@ import { GenerateCertificateComponent } from './modules/generate-certificate/gen
 import { MatCardModule } from '@angular/material/card';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { ToastrModule } from 'ngx-toastr';
+import { GenerateRootCertificateComponent } from './modules/generate-root-certificate/generate-root-certificate.component';
+import { MyCertificatesComponent } from './modules/my-certificates/my-certificates.component';
 
 @NgModule({
   declarations: [
@@ -17,8 +21,15 @@ import { FormsModule } from '@angular/forms';
     NavbarComponent,
     ViewComponent,
     GenerateCertificateComponent,
+    GenerateRootCertificateComponent,
+    MyCertificatesComponent,
   ],
   imports: [
+    BrowserAnimationsModule,
+    ToastrModule.forRoot({
+      positionClass: 'toast-top-right',
+      preventDuplicates: true,
+    }),
     FormsModule,
     BrowserModule,
     NgbModule,

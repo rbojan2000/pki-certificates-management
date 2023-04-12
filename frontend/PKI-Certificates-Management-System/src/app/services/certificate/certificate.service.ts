@@ -20,15 +20,39 @@ export class CertificateService {
     });
   }
 
-  getCertificatesByUserId(userId: string): Observable<Certificate[]> {
-    return this.http.get<Certificate[]>(this.apiHost + 'api/user/getUserCertificates/' + userId, {
+  getCertificatesByUserId(): Observable<Certificate[]> {
+    var userID = '642dafe9d9e299372bb8c612';
+    return this.http.get<Certificate[]>(
+      this.apiHost + 'api/certificate/getUserCertificates/' + userID,
+      {
+        headers: this.headers,
+      }
+    );
+  }
+
+  revokeCertificate(alias: string): any {
+    return this.http.get(this.apiHost + 'api/certificate/revoke/' + alias, {
       headers: this.headers,
     });
   }
 
-  revokeCertificate(alias: string): any {
-    let params = new HttpParams();
-    params = params.append('alias', alias);
-    return this.http.put(this.apiHost + 'api/certificate/' + alias, {});
+  createCertificate(createCertificateDTO: any) {
+    return this.http.post<any>(
+      this.apiHost + 'api/certificate/create',
+      JSON.stringify(createCertificateDTO),
+      {
+        headers: this.headers,
+      }
+    );
+  }
+
+  createRootCertificate(certificateDTO: any) {
+    return this.http.post<any>(
+      this.apiHost + 'api/certificate/createRoot',
+      JSON.stringify(certificateDTO),
+      {
+        headers: this.headers,
+      }
+    );
   }
 }

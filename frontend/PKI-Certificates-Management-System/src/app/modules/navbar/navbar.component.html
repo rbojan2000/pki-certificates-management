@@ -1,9 +1,13 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-success">
-  <a class="navbar-brand" style="margin-left: 2%; color:beige" href="#">PKI</a>
+  <a class="navbar-brand" style="margin-left: 2%; color: beige" href="#">PKI</a>
   <div class="navbar-nav justify-content-center">
     <a class="nav-item nav-link" [routerLink]="['/view']" routerLinkActive="active"
-      style="font-size: 18px; color:beige">View</a>
+      style="font-size: 18px; color: beige">All certificates</a>
+      <a class="nav-item nav-link" [routerLink]="['/myCertificates']" routerLinkActive="active"
+      style="font-size: 18px; color: beige">My certificates</a>
     <a class="nav-item nav-link" [routerLink]="['/generateCertificate']" routerLinkActive="active"
-      style="font-size: 18px; color:beige">Generate Certificate</a>
+      style="font-size: 18px; margin-left: 1%; color: beige">Generate Certificate</a>
+    <a class="nav-item nav-link" [routerLink]="['/generateRoot']" routerLinkActive="active"
+      style="font-size: 18px; margin-left: 1%; color: beige">Generate Root Certificate</a>
   </div>
 </nav>
