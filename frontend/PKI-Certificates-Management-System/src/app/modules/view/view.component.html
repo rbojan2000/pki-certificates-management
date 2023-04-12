@@ -11,18 +11,15 @@
         <p class="start-date">Start date: {{ certificate.startDate }}</p>
         <p class="end-date">End date: {{ certificate.endDate }}</p>
       </div>
-      <button
-        [disabled]="certificate.isRevoked"
-        class="revoke-button"
-        (click)="revokeCertificate(certificate.alias)"
-      >
+      <button *ngIf="certificate.alias !== 'my root ca'" [disabled]="certificate.isRevoked" class="revoke-button"
+        (click)="revokeCertificate(certificate.alias)">
         Revoke
       </button>
-      <button
-        class="revoke-button"
-        (click)="validateCertificate(certificate.alias)"
-      >
+      <button class="revoke-button" (click)="validateCertificate(certificate.alias)">
         Validate
+      </button>
+      <button class="revoke-button" (click)="saveCertificate(certificate.alias)">
+        Save
       </button>
     </div>
   </div>

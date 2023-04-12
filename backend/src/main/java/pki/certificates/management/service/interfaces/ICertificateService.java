@@ -15,16 +15,16 @@ import java.util.List;
 
 public interface ICertificateService {
 
-    public List<CertificateDTO> getAllCertificates();
-    public List<CertificateDTO> getCertificatesByAliases(List<String> aliases);
-    public X509Certificate createEndEntityOrIntermediateCertificate(CreateCertificateDTO createCertificateDTO) throws  IOException, CertificateException, OperatorCreationException, ParseException;
-    public X509Certificate createRootCertificate(CreateCertificateDTO createCertificateDTO) throws NoSuchAlgorithmException, NoSuchProviderException, OperatorCreationException, ParseException, CertIOException, CertificateException;
-
-    public boolean checkCertificateValidity(String alias);
-
-    public List<CertificateDTO> getAllValidUserCertificatesForSign (String userID);
-
+    List<CertificateDTO> getAllCertificates();
+    List<CertificateDTO> getCertificatesByAliases(List<String> aliases);
+    X509Certificate createEndEntityOrIntermediateCertificate(CreateCertificateDTO createCertificateDTO) throws  IOException, CertificateException, OperatorCreationException, ParseException;
+    X509Certificate createRootCertificate(CreateCertificateDTO createCertificateDTO) throws NoSuchAlgorithmException, NoSuchProviderException, OperatorCreationException, ParseException, CertIOException, CertificateException;
     List<CertificateDTO> userCertificates(String userID);
+    void revokeCertificate(String alias);
+    void saveCertificateToFile(String alias) throws Exception;
 
-    public void revokeCertificate(String alias);
+    boolean checkCertificateValidity(String alias);
+
+    List<CertificateDTO> getAllValidUserCertificatesForSign (String userID);
+
 }

@@ -27,6 +27,16 @@ export class ViewComponent implements OnInit {
     location.reload();
   }
 
+  saveCertificate(alias: string) {
+    this.certificateService.saveCertificate(alias).subscribe((res) => {
+      if (!res) {
+        this.toastr.success('Saved!');
+      } else {
+        this.toastr.error('Error!');
+      }
+    });
+  }
+
   validateCertificate(alias: string) {
     this.certificateService.validateCertificate(alias).subscribe((res) => {
       if (res) {

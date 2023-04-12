@@ -36,6 +36,15 @@ export class CertificateService {
     });
   }
 
+  saveCertificate(alias: string): Observable<boolean> {
+    return this.http.get<boolean>(
+      this.apiHost + 'api/certificate/save/' + alias,
+      {
+        headers: this.headers,
+      }
+    );
+  }
+
   validateCertificate(alias: string): Observable<boolean> {
     return this.http.get<boolean>(
       this.apiHost + 'api/certificate/checkValidity/' + alias,

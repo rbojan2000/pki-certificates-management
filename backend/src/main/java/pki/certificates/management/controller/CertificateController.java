@@ -49,6 +49,12 @@ public class CertificateController {
         return certificateService.userCertificates(userID);
     }
 
+    @GetMapping(path = "/save/{alias}")
+    @CrossOrigin(origins = "http://localhost:4200")
+    public void saveCertificate (@PathVariable String alias) throws Exception {
+        certificateService.saveCertificateToFile(alias);
+    }
+
     @GetMapping(path = "/revoke/{alias}")
     @CrossOrigin(origins = "http://localhost:4200")
     public void revokeCertificate (@PathVariable String alias){

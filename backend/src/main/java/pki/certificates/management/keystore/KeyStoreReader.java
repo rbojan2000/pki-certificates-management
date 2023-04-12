@@ -184,6 +184,30 @@ public class KeyStoreReader {
         return certificates;
     }
 
+
+    /**
+     * Ucitava sertifikat iz KS fajla po alijasima
+     */
+    public Certificate getCertificateFromKeyStoreByAlias(String keyStoreFile, String keyStorePass, String alias) {
+
+        try {
+            KeyStore ks = KeyStore.getInstance("JKS", "SUN");
+            BufferedInputStream in = new BufferedInputStream(new FileInputStream(keyStoreFile));
+            ks.load(in, keyStorePass.toCharArray());
+
+                Certificate cert = ks.getCertificate(alias);
+                if (cert != null) {
+                    return cert;
+                }
+
+        } catch (KeyStoreException | NoSuchProviderException |
+                 NoSuchAlgorithmException | CertificateException | IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     /**
      * Ucitava sve alijase iz KS fajla
      */
