@@ -1,13 +1,14 @@
 package pki.certificates.management.service.implementations;
 
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
 import org.bouncycastle.asn1.x500.style.BCStyle;
-import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.*;
+import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.Extension;
-import org.bouncycastle.asn1.x509.KeyUsage;
-import org.bouncycastle.cert.CertIOException;
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.cert.*;
+import org.bouncycastle.cert.jcajce.JcaX509CRLConverter;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.operator.ContentSigner;
@@ -27,14 +28,11 @@ import pki.certificates.management.model.User;
 import pki.certificates.management.model.UserCertificate;
 import pki.certificates.management.service.interfaces.ICertificateService;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigInteger;
 import java.security.*;
+import java.security.cert.*;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -98,10 +96,10 @@ public class CertificateService implements ICertificateService {
                 parseDate(createCertificateDTO.endDate),
                 subject.getX500Name(),
                 subject.getPublicKey())
-                    .addExtension(Extension.basicConstraints, Boolean.valueOf(createCertificateDTO.selectedAuthority),
-                            new BasicConstraints(Boolean.valueOf(createCertificateDTO.selectedAuthority)))
-                    .addExtension(Extension.keyUsage, Boolean.valueOf(createCertificateDTO.selectedAuthority),
-                            new KeyUsage(KeyUsage.keyCertSign));
+                .addExtension(Extension.basicConstraints, Boolean.valueOf(createCertificateDTO.selectedAuthority),
+                        new BasicConstraints(Boolean.valueOf(createCertificateDTO.selectedAuthority)))
+                .addExtension(Extension.keyUsage, Boolean.valueOf(createCertificateDTO.selectedAuthority),
+                        new KeyUsage(KeyUsage.keyCertSign));
 
         // Generate certificate holder
         X509CertificateHolder certHolder = certGen.build(contentSigner);
@@ -158,13 +156,33 @@ public class CertificateService implements ICertificateService {
     @Override
     public List<CertificateDTO> userCertificates(String userID) {
         User user = userService.getUserByID(userID);
-        List<CertificateDTO> certs =  getCertificatesByAliases(user.getCerts().stream()
+        List<CertificateDTO> certs = getCertificatesByAliases(user.getCerts().stream()
                 .map(UserCertificate::getAlias)
                 .collect(Collectors.toList()));
         return certs;
     }
 
     public void revokeCertificate(String alias) {
+        try {
+            KeyStore ks = KeyStore.getInstance("JKS", "SUN");
+            BufferedInputStream in = new BufferedInputStream(new FileInputStream("src/main/resources/static/other-keystore.jks"));
+            ks.load(in, "password".toCharArray());
+
+            Certificate cert = ks.getCertificate(alias);
+            X509Certificate revokedCert = (X509Certificate) cert;
+
+            X509CRL crl = generateCRL(revokedCert, alias);
+
+            // Čuvanje CRL-a u fajlu
+            FileOutputStream crlOut = new FileOutputStream("src/main/resources/static/crl/crl.crl");
+            crlOut.write(crl.getEncoded());
+            crlOut.close();
+
+        } catch (CertificateException | KeyStoreException | IOException | NoSuchAlgorithmException |
+                 NoSuchProviderException | UnrecoverableKeyException | OperatorCreationException | CRLException ex) {
+            throw new RuntimeException(ex);
+        }
+
         User user = userService.findByCertsAlias(alias);
         user.getCerts().stream()
                 .filter(userCertificateDto -> userCertificateDto.getAlias().equals(alias))
@@ -172,6 +190,72 @@ public class CertificateService implements ICertificateService {
                 .ifPresent(userCertificateDto -> userCertificateDto.setRevoked(true));
 
         userService.updateUser(user);
+    }
+
+    public void saveCertificateToFile(String alias) throws Exception {
+        KeyStore ks = KeyStore.getInstance("JKS", "SUN");
+        BufferedInputStream in = new BufferedInputStream(new FileInputStream("src/main/resources/static/root-keystore.jks"));
+        ks.load(in, "password".toCharArray());
+
+        Certificate cert = ks.getCertificate(alias);
+        X509Certificate downCert = (X509Certificate) cert;
+        String directoryPath = "src/main/resources/static/saved";
+        String fileName = alias + ".crt";
+        File directory = new File(directoryPath);
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+        File file = new File(directory, fileName);
+        FileOutputStream fos = new FileOutputStream(file);
+        fos.write(downCert.getEncoded());
+        fos.close();
+    }
+
+    private X509CRL generateCRL(X509Certificate revokedCert, String alias) throws NoSuchAlgorithmException, CertificateException, CRLException, IOException, KeyStoreException, NoSuchProviderException, UnrecoverableKeyException, OperatorCreationException {
+        // Čitanje postojećeg CRL fajla (ako postoji)
+        File crlFile = new File("src/main/resources/static/crl/crl.crl");
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        List<X509CRLEntry> revokedCertificates = new ArrayList<>();
+        if (crlFile.exists()) {
+            FileInputStream fis = new FileInputStream(crlFile);
+            X509CRL crl = (X509CRL) cf.generateCRL(fis);
+            revokedCertificates.addAll(crl.getRevokedCertificates());
+            fis.close();
+        }
+
+        // Kreiranje objekta X509v2CRLBuilder
+        X509v2CRLBuilder crlBuilder = new X509v2CRLBuilder(new X500Name(revokedCert.getIssuerX500Principal().getName()), new Date());
+
+        // Dodavanje povučenog sertifikata u CRL
+        crlBuilder.addCRLEntry(revokedCert.getSerialNumber(), new Date(), CRLReason.keyCompromise);
+
+        // Dodavanje postojećih povučenih sertifikata u CRL
+        for (X509CRLEntry entry : revokedCertificates) {
+            byte[] extensionValue = entry.getExtensionValue(Extension.basicConstraints.getId());
+            if (extensionValue != null) {
+                Extension extension = new Extension(Extension.basicConstraints, false, ASN1OctetString.getInstance(new GeneralNames(new GeneralName(new X500Name(Arrays.toString(extensionValue))))));
+                Extensions extensions = new Extensions(extension);
+                crlBuilder.addCRLEntry(entry.getSerialNumber(), entry.getRevocationDate(), extensions);
+            } else {
+                crlBuilder.addCRLEntry(entry.getSerialNumber(), entry.getRevocationDate(), null);
+            }
+        }
+
+        // Potpisivanje CRL-a
+        KeyStore ks = KeyStore.getInstance("JKS", "SUN");
+        BufferedInputStream in = new BufferedInputStream(new FileInputStream("src/main/resources/static/other-keystore.jks"));
+        ks.load(in, "password".toCharArray());
+        PrivateKey privateKey = (PrivateKey) ks.getKey(alias, "password".toCharArray());
+        X509CRLHolder crlHolder = crlBuilder.build(new JcaContentSignerBuilder("SHA256withRSA").build(privateKey));
+        JcaX509CRLConverter crlConverter = new JcaX509CRLConverter();
+        X509CRL crl = crlConverter.getCRL(crlHolder);
+
+        // Čuvanje CRL-a u fajlu
+        FileOutputStream crlOut = new FileOutputStream("src/main/resources/static/crl/crl.crl");
+        crlOut.write(crl.getEncoded());
+        crlOut.close();
+
+        return crl;
     }
 
     private List<Certificate> getAllCertificatesFromKeyStores() {
@@ -182,14 +266,6 @@ public class CertificateService implements ICertificateService {
         allCertificates.addAll(otherCertificates);
 
         return allCertificates;
-    }
-
-    private static List<UserCertificate> getNonRevokedCerts(List<User> users) {
-        return users.stream()
-                .flatMap(user -> user.getCerts().stream())
-                .filter(cert -> !cert.isRevoked())
-                .map(cert -> new UserCertificate(cert.getAlias(), cert.isRevoked()))
-                .collect(Collectors.toList());
     }
 
     private List<String> getAliasesFromKeyStore() {

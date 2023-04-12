@@ -16,9 +16,9 @@ public class ConfigurationManager {
 
     public ConfigurationManager() {
         dotenv = Dotenv.load();
-        rootKeystorePassword = dotenv.get("ROOT_KEYSTORE_PASSWORD");
-        otherKeystorePassword = dotenv.get("OTHER_KEYSTORE_PASSWORD");
-        otherKeystorePath = dotenv.get("OTHER_KEYSTORE_PATH");
-        rootKeystorePath = dotenv.get("ROOT_KEYSTORE_PATH");
+        rootKeystorePassword = "password";
+        otherKeystorePassword = "password";
+        otherKeystorePath = "src/main/resources/static/other-keystore.jks";
+        rootKeystorePath = "src/main/resources/static/root-keystore.jks";
     }
 }
