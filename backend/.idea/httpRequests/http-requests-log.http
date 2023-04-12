@@ -1,9 +1,0 @@
-GET http://localhost:8080/api/certificate/revoke/fsasafsfa
-Connection: Keep-Alive
-User-Agent: Apache-HttpClient/4.5.13 (Java/17.0.5)
-Accept-Encoding: br,deflate,gzip,x-gzip
-
-<> 2023-04-07T140334.415.json
-
-###
-

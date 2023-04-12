@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.bouncycastle.asn1.x500.X500Name;
-import org.springframework.stereotype.Component;
 
 import java.security.PublicKey;
 
