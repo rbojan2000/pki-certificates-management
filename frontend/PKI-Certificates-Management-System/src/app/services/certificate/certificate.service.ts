@@ -21,7 +21,7 @@ export class CertificateService {
   }
 
   getCertificatesByUserId(): Observable<Certificate[]> {
-    var userID = '642dafe9d9e299372bb8c612';
+    var userID = '642ee236dd48a732024de3e3';
     return this.http.get<Certificate[]>(
       this.apiHost + 'api/certificate/getUserCertificates/' + userID,
       {

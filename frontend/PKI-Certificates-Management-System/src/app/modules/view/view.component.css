@@ -65,10 +65,14 @@
   border: none;
   border-radius: 3px;
   padding: 5px 10px;
-  cursor: pointer;
   margin-left: auto;
 }
 
-.revoke-button:hover {
+.revoke-button:hover:not(:disabled) {
   background-color: #006666;
+}
+
+.revoke-button:disabled {
+  background-color: grey;
+  color: white;
 }

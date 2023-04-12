@@ -10,5 +10,6 @@ public class CertificateDTO {
     public String endDate;
     public String type;
     public String alias;
+    public boolean isRevoked;
 
 }

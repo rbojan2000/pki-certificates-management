@@ -220,7 +220,7 @@ public class CertificateService implements ICertificateService {
 
                 String type = x509Certificate.getBasicConstraints() < 0 ? "FALSE" : "TRUE";
                 String alias = aliases == null ? null : aliases.get(i);
-                CertificateDTO dto = new CertificateDTO(x509Certificate.getSubjectDN().getName(), x509Certificate.getIssuerDN().getName(), x509Certificate.getNotBefore().toString(), x509Certificate.getNotAfter().toString(), type, alias);
+                CertificateDTO dto = new CertificateDTO(x509Certificate.getSubjectDN().getName(), x509Certificate.getIssuerDN().getName(), x509Certificate.getNotBefore().toString(), x509Certificate.getNotAfter().toString(), type, alias, userService.isRevoked(alias));
                 dtos.add(dto);
                 i++;
             }

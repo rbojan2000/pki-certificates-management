@@ -49,4 +49,20 @@ public class UserService implements IUserService {
     public List<User> findAll() {
         return userRepository.findAll();
     }
+
+    public boolean isRevoked(String alias) {
+        User user = userRepository.findByAlias(alias);
+        if (user == null) {
+            // Alias nije pronađen
+            return false;
+        }
+        for (UserCertificate certificate : user.getCerts()) {
+            if (certificate.getAlias().equals(alias)) {
+                // Pronađen je sertifikat sa prosleđenim aliasom, vraćamo njegovu isRevoked vrednost
+                return certificate.isRevoked();
+            }
+        }
+        // Alias nije pronađen u sertifikatima
+        return false;
+    }
 }

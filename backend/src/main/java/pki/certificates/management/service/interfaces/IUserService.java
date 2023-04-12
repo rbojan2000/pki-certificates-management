@@ -15,6 +15,7 @@ public interface IUserService {
     User findByCertsAlias(String alias);
 
     void updateUser(User user);
+    boolean isRevoked(String alias);
 
     List<User> findAll();
 }
