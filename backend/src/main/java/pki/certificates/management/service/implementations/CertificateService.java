@@ -27,8 +27,6 @@ import pki.certificates.management.model.User;
 import pki.certificates.management.model.UserCertificate;
 import pki.certificates.management.service.interfaces.ICertificateService;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.*;
@@ -66,7 +64,7 @@ public class CertificateService implements ICertificateService {
         for (UserCertificate cert:
                 userService.getUserByID(userID).getCerts()) {
             if(checkCertificateValidity(cert.getAlias())) {
-                validCerts.add((X509Certificate) keyStoreReader.getCertificateByAliasFromKeyStore(cert.getAlias()));
+                validCerts.add(getCertificateByAlias(cert.getAlias()));
             }
         }
         return validCerts;
@@ -74,8 +72,7 @@ public class CertificateService implements ICertificateService {
 
     @Override
     public boolean checkCertificateValidity(String alias){
-        X509Certificate cert = (X509Certificate) keyStoreReader.getCertificateByAliasFromKeyStore(alias);
-
+        X509Certificate cert = getCertificateByAlias(alias);
         return checkCertificateChainValidity(cert);
     }
 
@@ -104,7 +101,7 @@ public class CertificateService implements ICertificateService {
 
             String segments[] = cert.getIssuerX500Principal().getName().split("=");
             String issuerName = segments[segments.length - 1].toLowerCase();
-            cert = (X509Certificate) keyStoreReader.getCertificateByAliasFromKeyStore(issuerName);
+            cert = getCertificateByAlias(issuerName);
         }
 
         return true;
@@ -269,6 +266,16 @@ public class CertificateService implements ICertificateService {
         allCertificates.addAll(otherCertificates);
 
         return allCertificates;
+    }
+
+
+
+    private X509Certificate getCertificateByAlias(String alias) {
+        X509Certificate cert = (X509Certificate) keyStoreReader.readCertificate(configurationManager.getRootKeystorePath(), configurationManager.getRootKeystorePassword(), alias);
+        if(cert == null) {
+            cert = (X509Certificate) keyStoreReader.readCertificate(configurationManager.getOtherKeystorePath(), configurationManager.getOtherKeystorePassword(), alias);
+        }
+        return cert;
     }
 
     private List<CertificateDTO> mapCertificatesToDtos(List<Certificate> certificates, List<String> aliases) {
