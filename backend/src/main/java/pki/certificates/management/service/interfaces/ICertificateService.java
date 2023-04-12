@@ -20,6 +20,10 @@ public interface ICertificateService {
     public X509Certificate createEndEntityOrIntermediateCertificate(CreateCertificateDTO createCertificateDTO) throws  IOException, CertificateException, OperatorCreationException, ParseException;
     public X509Certificate createRootCertificate(CreateCertificateDTO createCertificateDTO) throws NoSuchAlgorithmException, NoSuchProviderException, OperatorCreationException, ParseException, CertIOException, CertificateException;
 
+    public boolean checkCertificateValidity(String alias);
+
+    public List<X509Certificate> getAllValidUserCertificates (String userID);
+
     List<CertificateDTO> userCertificates(String userID);
 
     public void revokeCertificate(String alias);

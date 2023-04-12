@@ -5,15 +5,13 @@ import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.springframework.stereotype.Component;
 import pki.certificates.management.model.Issuer;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -100,6 +98,35 @@ public class KeyStoreReader {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        return null;
+    }
+
+    public Certificate getCertificateByAliasFromKeyStore(String alias) {
+        try{
+            File directory = new File("src/main/resources/static");
+            File[] files = directory.listFiles();
+
+            for (File file : files) {
+                if(file.isFile() && file.getName().endsWith(".jks")) {
+                    KeyStore keyStore = KeyStore.getInstance("JKS");
+                    FileInputStream fileInputStream = new FileInputStream(file);
+                    keyStore.load(fileInputStream, "password".toCharArray());
+
+                    Enumeration<String> aliases2 = keyStore.aliases();
+
+                    for (String al : Collections.list(aliases2)) {
+
+                        Certificate certificate = keyStore.getCertificate(al);
+
+                        if (certificate instanceof X509Certificate && alias.equals(al)) {
+                            return certificate;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
         return null;
     }

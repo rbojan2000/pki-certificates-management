@@ -61,6 +61,66 @@ public class CertificateService implements ICertificateService {
     }
 
     @Override
+    public List<X509Certificate> getAllValidUserCertificates (String userID) {
+        List<X509Certificate> validCerts = new ArrayList<>();
+        for (UserCertificate cert:
+                userService.getUserByID(userID).getCerts()) {
+            if(checkCertificateValidity(cert.getAlias())) {
+                validCerts.add((X509Certificate) keyStoreReader.getCertificateByAliasFromKeyStore(cert.getAlias()));
+            }
+        }
+        return validCerts;
+    }
+
+    @Override
+    public boolean checkCertificateValidity(String alias){
+        X509Certificate cert = (X509Certificate) keyStoreReader.getCertificateByAliasFromKeyStore(alias);
+
+        return checkCertificateChainValidity(cert);
+    }
+
+
+    private boolean checkCertificateValidityByDate(X509Certificate cert) {
+        try {
+            cert.checkValidity(new Date());
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+
+    private boolean checkCertificateChainValidity(X509Certificate cert) {
+        while(!isSelfSigned(cert)) {
+            if(!checkCertificateValidityByDate(cert)) {
+                return false;
+            }
+
+            String segments2[] = cert.getSubjectX500Principal().getName().split("=");
+            String subjectName = segments2[segments2.length - 1].toLowerCase();
+            if(userService.isRevoked(subjectName)){
+                return false;
+            }
+
+            String segments[] = cert.getIssuerX500Principal().getName().split("=");
+            String issuerName = segments[segments.length - 1].toLowerCase();
+            cert = (X509Certificate) keyStoreReader.getCertificateByAliasFromKeyStore(issuerName);
+        }
+
+        return true;
+    }
+
+
+    private boolean isSelfSigned(X509Certificate cert) {
+        String segments[] = cert.getIssuerX500Principal().getName().split("=");
+        String issuerName = segments[segments.length - 1].toLowerCase();
+
+        String segments2[] = cert.getSubjectX500Principal().getName().split("=");
+        String subjectName = segments2[segments2.length - 1].toLowerCase();
+        return issuerName.equals(subjectName);
+    }
+
+    @Override
     public List<CertificateDTO> getAllCertificates() {
         List<Certificate> certificates = getAllCertificatesFromKeyStores();
         List<String> aliases = getAliasesFromKeyStore();
@@ -97,10 +157,10 @@ public class CertificateService implements ICertificateService {
                 parseDate(createCertificateDTO.endDate),
                 subject.getX500Name(),
                 subject.getPublicKey())
-                    .addExtension(Extension.basicConstraints, Boolean.valueOf(createCertificateDTO.selectedAuthority),
-                            new BasicConstraints(Boolean.valueOf(createCertificateDTO.selectedAuthority)))
-                    .addExtension(Extension.keyUsage, Boolean.valueOf(createCertificateDTO.selectedAuthority),
-                            new KeyUsage(KeyUsage.keyCertSign));
+                .addExtension(Extension.basicConstraints, Boolean.valueOf(createCertificateDTO.selectedAuthority),
+                        new BasicConstraints(Boolean.valueOf(createCertificateDTO.selectedAuthority)))
+                .addExtension(Extension.keyUsage, Boolean.valueOf(createCertificateDTO.selectedAuthority),
+                        new KeyUsage(KeyUsage.keyCertSign));
 
         // Generate certificate holder
         X509CertificateHolder certHolder = certGen.build(contentSigner);

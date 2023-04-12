@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpHeaders, HttpClient, HttpParams } from '@angular/common/http';
+import { HttpHeaders, HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Certificate } from 'src/app/model/certificate';
 
@@ -34,6 +34,13 @@ export class CertificateService {
     return this.http.get(this.apiHost + 'api/certificate/revoke/' + alias, {
       headers: this.headers,
     });
+  }
+
+  validateCertificate(alias: string): Observable<boolean> {
+    return this.http.get<boolean>(
+      this.apiHost + 'api/certificate/checkValidity/' + alias,
+      { headers: this.headers }
+    );
   }
 
   createCertificate(createCertificateDTO: any) {
