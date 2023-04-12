@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpHeaders, HttpClient, HttpParams } from '@angular/common/http';
+import { HttpHeaders, HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Certificate } from 'src/app/model/certificate';
 
@@ -21,7 +21,7 @@ export class CertificateService {
   }
 
   getCertificatesByUserId(): Observable<Certificate[]> {
-    var userID = '642ee236dd48a732024de3e3';
+    var userID = '642dafe9d9e299372bb8c612';
     return this.http.get<Certificate[]>(
       this.apiHost + 'api/certificate/getUserCertificates/' + userID,
       {
@@ -34,6 +34,22 @@ export class CertificateService {
     return this.http.get(this.apiHost + 'api/certificate/revoke/' + alias, {
       headers: this.headers,
     });
+  }
+
+  saveCertificate(alias: string): Observable<boolean> {
+    return this.http.get<boolean>(
+      this.apiHost + 'api/certificate/save/' + alias,
+      {
+        headers: this.headers,
+      }
+    );
+  }
+
+  validateCertificate(alias: string): Observable<boolean> {
+    return this.http.get<boolean>(
+      this.apiHost + 'api/certificate/checkValidity/' + alias,
+      { headers: this.headers }
+    );
   }
 
   createCertificate(createCertificateDTO: any) {

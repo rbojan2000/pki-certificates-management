@@ -22,4 +22,9 @@ public interface ICertificateService {
     List<CertificateDTO> userCertificates(String userID);
     void revokeCertificate(String alias);
     void saveCertificateToFile(String alias) throws Exception;
+
+    boolean checkCertificateValidity(String alias);
+
+    List<CertificateDTO> getAllValidUserCertificatesForSign (String userID);
+
 }

@@ -28,7 +28,9 @@ import pki.certificates.management.model.User;
 import pki.certificates.management.model.UserCertificate;
 import pki.certificates.management.service.interfaces.ICertificateService;
 
+
 import java.io.*;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.*;
@@ -59,6 +61,75 @@ public class CertificateService implements ICertificateService {
     }
 
     @Override
+    public List<CertificateDTO> getAllValidUserCertificatesForSign (String userID) {
+        List<Certificate> validCerts = new ArrayList<>();
+        List<String> aliases = new ArrayList<>();
+        User user = userService.getUserByID(userID);
+
+        for (UserCertificate cert:
+                user.getCerts()) {
+
+            aliases.add(cert.getAlias());
+            Certificate certificate = getCertificateByAlias(cert.getAlias());
+            Boolean isCA = ((X509Certificate) certificate).getBasicConstraints() < 0 ? false : true;
+
+            if(checkCertificateValidity(cert.getAlias()) && isCA) {
+                validCerts.add(getCertificateByAlias(cert.getAlias()));
+            }
+        }
+
+
+        return mapCertificatesToDtos(validCerts, aliases);
+    }
+
+    @Override
+    public boolean checkCertificateValidity(String alias){
+        X509Certificate cert = getCertificateByAlias(alias);
+        return checkCertificateChainValidity(cert);
+    }
+
+
+    private boolean checkCertificateValidityByDate(X509Certificate cert) {
+        try {
+            cert.checkValidity(new Date());
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+
+    private boolean checkCertificateChainValidity(X509Certificate cert) {
+        while(!isSelfSigned(cert)) {
+            if(!checkCertificateValidityByDate(cert)) {
+                return false;
+            }
+
+            String segments2[] = cert.getSubjectX500Principal().getName().split("=");
+            String subjectName = segments2[segments2.length - 1].toLowerCase();
+            if(userService.isRevoked(subjectName)){
+                return false;
+            }
+
+            String segments[] = cert.getIssuerX500Principal().getName().split("=");
+            String issuerName = segments[segments.length - 1].toLowerCase();
+            cert = getCertificateByAlias(issuerName);
+        }
+
+        return true;
+    }
+
+
+    private boolean isSelfSigned(X509Certificate cert) {
+        String segments[] = cert.getIssuerX500Principal().getName().split("=");
+        String issuerName = segments[segments.length - 1].toLowerCase();
+
+        String segments2[] = cert.getSubjectX500Principal().getName().split("=");
+        String subjectName = segments2[segments2.length - 1].toLowerCase();
+        return issuerName.equals(subjectName);
+    }
+
+    @Override
     public List<CertificateDTO> getAllCertificates() {
         List<Certificate> certificates = getAllCertificatesFromKeyStores();
         List<String> aliases = getAliasesFromKeyStore();
@@ -77,13 +148,12 @@ public class CertificateService implements ICertificateService {
         // Generate subject
         Subject subject = generateSubject(createCertificateDTO.subjectCN, createCertificateDTO.subjectO, createCertificateDTO.subjectOU, createCertificateDTO.subjectUN, createCertificateDTO.subjectCountry);
 
-        Issuer issuer = new Issuer();
-        Properties props = new Properties();
-        try {
-            issuer = keyStoreReader.readIssuerFromStore(configurationManager.getRootKeystorePath(), createCertificateDTO.aliasIssuer, configurationManager.getRootKeystorePassword().toCharArray(), configurationManager.getRootKeystorePassword().toCharArray());
-        } catch (Exception e) {
-            issuer = keyStoreReader.readIssuerFromStore(configurationManager.getOtherKeystorePath(), createCertificateDTO.aliasIssuer, configurationManager.getOtherKeystorePassword().toCharArray(), configurationManager.getOtherKeystorePassword().toCharArray());
+        Issuer issuer;
 
+        issuer = keyStoreReader.readIssuerFromStore(configurationManager.getRootKeystorePath(), createCertificateDTO.aliasIssuer, configurationManager.getRootKeystorePassword().toCharArray(), configurationManager.getRootKeystorePassword().toCharArray());
+
+        if(issuer == null) {
+            issuer = keyStoreReader.readIssuerFromStore(configurationManager.getOtherKeystorePath(), createCertificateDTO.aliasIssuer, configurationManager.getOtherKeystorePassword().toCharArray(), configurationManager.getOtherKeystorePassword().toCharArray());
         }
 
         ContentSigner contentSigner = new JcaContentSignerBuilder("SHA256WithRSAEncryption").setProvider("BC").build(issuer.getPrivateKey());
@@ -193,12 +263,7 @@ public class CertificateService implements ICertificateService {
     }
 
     public void saveCertificateToFile(String alias) throws Exception {
-        KeyStore ks = KeyStore.getInstance("JKS", "SUN");
-        BufferedInputStream in = new BufferedInputStream(new FileInputStream("src/main/resources/static/root-keystore.jks"));
-        ks.load(in, "password".toCharArray());
-
-        Certificate cert = ks.getCertificate(alias);
-        X509Certificate downCert = (X509Certificate) cert;
+        X509Certificate downCert = getCertificateByAlias(alias);
         String directoryPath = "src/main/resources/static/saved";
         String fileName = alias + ".crt";
         File directory = new File(directoryPath);
@@ -286,6 +351,16 @@ public class CertificateService implements ICertificateService {
         allCertificates.addAll(otherCertificates);
 
         return allCertificates;
+    }
+
+
+
+    private X509Certificate getCertificateByAlias(String alias) {
+        X509Certificate cert = (X509Certificate) keyStoreReader.readCertificate(configurationManager.getRootKeystorePath(), configurationManager.getRootKeystorePassword(), alias);
+        if(cert == null) {
+            cert = (X509Certificate) keyStoreReader.readCertificate(configurationManager.getOtherKeystorePath(), configurationManager.getOtherKeystorePassword(), alias);
+        }
+        return cert;
     }
 
     private List<CertificateDTO> mapCertificatesToDtos(List<Certificate> certificates, List<String> aliases) {

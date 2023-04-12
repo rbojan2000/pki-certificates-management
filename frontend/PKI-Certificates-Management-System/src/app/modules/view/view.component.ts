@@ -1,6 +1,7 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Certificate } from 'src/app/model/certificate';
 import { CertificateService } from 'src/app/services/certificate/certificate.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-view',
@@ -10,7 +11,10 @@ import { CertificateService } from 'src/app/services/certificate/certificate.ser
 export class ViewComponent implements OnInit {
   public certificates: Certificate[] = [];
 
-  constructor(private certificateService: CertificateService) {}
+  constructor(
+    private certificateService: CertificateService,
+    private toastr: ToastrService
+  ) {}
 
   ngOnInit(): void {
     this.certificateService.getCertificates().subscribe((res: any) => {
@@ -21,5 +25,25 @@ export class ViewComponent implements OnInit {
   revokeCertificate(alias: string) {
     this.certificateService.revokeCertificate(alias).subscribe();
     location.reload();
+  }
+
+  saveCertificate(alias: string) {
+    this.certificateService.saveCertificate(alias).subscribe((res) => {
+      if (!res) {
+        this.toastr.success('Saved!');
+      } else {
+        this.toastr.error('Error!');
+      }
+    });
+  }
+
+  validateCertificate(alias: string) {
+    this.certificateService.validateCertificate(alias).subscribe((res) => {
+      if (res) {
+        this.toastr.success('Valid!');
+      } else {
+        this.toastr.error('Invalid!');
+      }
+    });
   }
 }
