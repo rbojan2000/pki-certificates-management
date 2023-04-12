@@ -87,7 +87,17 @@ public class CertificateService implements ICertificateService {
         ContentSigner contentSigner = new JcaContentSignerBuilder("SHA256WithRSAEncryption").setProvider("BC").build(issuer.getPrivateKey());
 
         // Create certificate generator
-        X509v3CertificateBuilder certGen = new JcaX509v3CertificateBuilder(issuer.getX500Name(), new BigInteger(128, new SecureRandom()), parseDate(createCertificateDTO.startDate), parseDate(createCertificateDTO.endDate), subject.getX500Name(), subject.getPublicKey()).addExtension(Extension.basicConstraints, Boolean.valueOf(createCertificateDTO.selectedAuthority), new BasicConstraints(Boolean.valueOf(createCertificateDTO.selectedAuthority))).addExtension(Extension.keyUsage, Boolean.valueOf(createCertificateDTO.selectedAuthority), new KeyUsage(KeyUsage.keyCertSign));
+        X509v3CertificateBuilder certGen = new JcaX509v3CertificateBuilder(
+                issuer.getX500Name(),
+                new BigInteger(128, new SecureRandom()),
+                parseDate(createCertificateDTO.startDate),
+                parseDate(createCertificateDTO.endDate),
+                subject.getX500Name(),
+                subject.getPublicKey())
+                    .addExtension(Extension.basicConstraints, Boolean.valueOf(createCertificateDTO.selectedAuthority),
+                            new BasicConstraints(Boolean.valueOf(createCertificateDTO.selectedAuthority)))
+                    .addExtension(Extension.keyUsage, Boolean.valueOf(createCertificateDTO.selectedAuthority),
+                            new KeyUsage(KeyUsage.keyCertSign));
 
         // Generate certificate holder
         X509CertificateHolder certHolder = certGen.build(contentSigner);
