@@ -181,7 +181,7 @@ public class CertificateService implements ICertificateService {
         // Store certificate in key store
         keyStoreWriter.loadKeyStore(configurationManager.getOtherKeystorePath(), configurationManager.getOtherKeystorePassword().toCharArray());
         String alias = generateAlias(createCertificateDTO.subjectCN);
-        keyStoreWriter.write(alias, issuer.getPrivateKey(), "password".toCharArray(), certificate);
+        keyStoreWriter.write(alias, issuer.getPrivateKey(), configurationManager.getOtherKeystorePassword().toCharArray(), certificate);
         keyStoreWriter.saveKeyStore(configurationManager.getOtherKeystorePath(), configurationManager.getOtherKeystorePassword().toCharArray());
 
         return certificate;
@@ -235,8 +235,8 @@ public class CertificateService implements ICertificateService {
     public void revokeCertificate(String alias) {
         try {
             KeyStore ks = KeyStore.getInstance("JKS", "SUN");
-            BufferedInputStream in = new BufferedInputStream(new FileInputStream("src/main/resources/static/other-keystore.jks"));
-            ks.load(in, "password".toCharArray());
+            BufferedInputStream in = new BufferedInputStream(new FileInputStream(configurationManager.getOtherKeystorePath()));
+            ks.load(in, configurationManager.getOtherKeystorePassword().toCharArray());
 
             Certificate cert = ks.getCertificate(alias);
             X509Certificate revokedCert = (X509Certificate) cert;
@@ -244,7 +244,7 @@ public class CertificateService implements ICertificateService {
             X509CRL crl = generateCRL(revokedCert, alias);
 
             // Čuvanje CRL-a u fajlu
-            FileOutputStream crlOut = new FileOutputStream("src/main/resources/static/crl/crl.crl");
+            FileOutputStream crlOut = new FileOutputStream(configurationManager.getCrlPath());
             crlOut.write(crl.getEncoded());
             crlOut.close();
 
@@ -264,7 +264,7 @@ public class CertificateService implements ICertificateService {
 
     public void saveCertificateToFile(String alias) throws Exception {
         X509Certificate downCert = getCertificateByAlias(alias);
-        String directoryPath = "src/main/resources/static/saved";
+        String directoryPath = configurationManager.getSavePath();
         String fileName = alias + ".crt";
         File directory = new File(directoryPath);
         if (!directory.exists()) {
@@ -278,7 +278,7 @@ public class CertificateService implements ICertificateService {
 
     private X509CRL generateCRL(X509Certificate revokedCert, String alias) throws NoSuchAlgorithmException, CertificateException, CRLException, IOException, KeyStoreException, NoSuchProviderException, UnrecoverableKeyException, OperatorCreationException {
         // Čitanje postojećeg CRL fajla (ako postoji)
-        File crlFile = new File("src/main/resources/static/crl/crl.crl");
+        File crlFile = new File(configurationManager.getCrlPath());
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
         List<X509CRLEntry> revokedCertificates = new ArrayList<>();
         if (crlFile.exists()) {
@@ -308,15 +308,15 @@ public class CertificateService implements ICertificateService {
 
         // Potpisivanje CRL-a
         KeyStore ks = KeyStore.getInstance("JKS", "SUN");
-        BufferedInputStream in = new BufferedInputStream(new FileInputStream("src/main/resources/static/other-keystore.jks"));
-        ks.load(in, "password".toCharArray());
-        PrivateKey privateKey = (PrivateKey) ks.getKey(alias, "password".toCharArray());
+        BufferedInputStream in = new BufferedInputStream(new FileInputStream(configurationManager.getOtherKeystorePath()));
+        ks.load(in, configurationManager.getOtherKeystorePassword().toCharArray());
+        PrivateKey privateKey = (PrivateKey) ks.getKey(alias, configurationManager.getOtherKeystorePassword().toCharArray());
         X509CRLHolder crlHolder = crlBuilder.build(new JcaContentSignerBuilder("SHA256withRSA").build(privateKey));
         JcaX509CRLConverter crlConverter = new JcaX509CRLConverter();
         X509CRL crl = crlConverter.getCRL(crlHolder);
 
         // Čuvanje CRL-a u fajlu
-        FileOutputStream crlOut = new FileOutputStream("src/main/resources/static/crl/crl.crl");
+        FileOutputStream crlOut = new FileOutputStream(configurationManager.getCrlPath());
         crlOut.write(crl.getEncoded());
         crlOut.close();
 

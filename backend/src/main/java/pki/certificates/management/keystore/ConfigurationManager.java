@@ -13,12 +13,17 @@ public class ConfigurationManager {
     private String otherKeystorePassword;
     private String otherKeystorePath;
     private String rootKeystorePath;
+    private String savePath;
+
+    private String crlPath;
 
     public ConfigurationManager() {
         dotenv = Dotenv.load();
-        rootKeystorePassword = "password";
-        otherKeystorePassword = "password";
-        otherKeystorePath = "src/main/resources/static/other-keystore.jks";
-        rootKeystorePath = "src/main/resources/static/root-keystore.jks";
+        rootKeystorePassword = dotenv.get("ROOT_KEYSTORE_PASSWORD");
+        otherKeystorePassword = dotenv.get("OTHER_KEYSTORE_PASSWORD");
+        otherKeystorePath = dotenv.get("OTHER_KEYSTORE_PATH");
+        rootKeystorePath = dotenv.get("ROOT_KEYSTORE_PATH");
+        savePath = dotenv.get("SAVE_PATH");
+        crlPath = dotenv.get("CRL_PATH");
     }
 }
