@@ -59,4 +59,10 @@ public class CertificateController {
     public boolean checkValidity(@PathVariable String alias) {
         return certificateService.checkCertificateValidity(alias);
     }
+
+    @GetMapping(path = "/getAllValidUserCerificatesForSign/{userID}")
+    public List<CertificateDTO> getAllValidUserCerificatesForSign(@PathVariable("userID") String userID) {
+        return certificateService.getAllValidUserCertificatesForSign(userID);
+    }
+
 }

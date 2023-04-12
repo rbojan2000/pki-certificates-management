@@ -59,15 +59,25 @@ public class CertificateService implements ICertificateService {
     }
 
     @Override
-    public List<X509Certificate> getAllValidUserCertificates (String userID) {
-        List<X509Certificate> validCerts = new ArrayList<>();
+    public List<CertificateDTO> getAllValidUserCertificatesForSign (String userID) {
+        List<Certificate> validCerts = new ArrayList<>();
+        List<String> aliases = new ArrayList<>();
+        User user = userService.getUserByID(userID);
+
         for (UserCertificate cert:
-                userService.getUserByID(userID).getCerts()) {
-            if(checkCertificateValidity(cert.getAlias())) {
+                user.getCerts()) {
+
+            aliases.add(cert.getAlias());
+            Certificate certificate = getCertificateByAlias(cert.getAlias());
+            Boolean isCA = ((X509Certificate) certificate).getBasicConstraints() < 0 ? false : true;
+
+            if(checkCertificateValidity(cert.getAlias()) && isCA) {
                 validCerts.add(getCertificateByAlias(cert.getAlias()));
             }
         }
-        return validCerts;
+
+
+        return mapCertificatesToDtos(validCerts, aliases);
     }
 
     @Override

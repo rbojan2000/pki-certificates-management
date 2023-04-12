@@ -22,7 +22,7 @@ public interface ICertificateService {
 
     public boolean checkCertificateValidity(String alias);
 
-    public List<X509Certificate> getAllValidUserCertificates (String userID);
+    public List<CertificateDTO> getAllValidUserCertificatesForSign (String userID);
 
     List<CertificateDTO> userCertificates(String userID);
 
