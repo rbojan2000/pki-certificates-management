@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pki.certificates.management.dto.CertificateDTO;
 import pki.certificates.management.dto.CreateCertificateDTO;
+import pki.certificates.management.keystore.ConfigurationManager;
 import pki.certificates.management.keystore.KeyStoreReader;
 import pki.certificates.management.keystore.KeyStoreWriter;
 import pki.certificates.management.model.Issuer;
@@ -49,6 +50,9 @@ public class CertificateService implements ICertificateService {
     KeyStoreWriter keyStoreWriter;
 
     @Autowired
+    ConfigurationManager configurationManager;
+
+    @Autowired
     UserService userService;
 
     public static String generateAlias(String companyName) {
@@ -76,11 +80,11 @@ public class CertificateService implements ICertificateService {
         Subject subject = generateSubject(createCertificateDTO.subjectCN, createCertificateDTO.subjectO, createCertificateDTO.subjectOU, createCertificateDTO.subjectUN, createCertificateDTO.subjectCountry);
 
         Issuer issuer = new Issuer();
-
+        Properties props = new Properties();
         try {
-            issuer = keyStoreReader.readIssuerFromStore("src/main/resources/static/root-keystore.jks", createCertificateDTO.aliasIssuer, "password".toCharArray(), "password".toCharArray());
+            issuer = keyStoreReader.readIssuerFromStore(configurationManager.getRootKeystorePath(), createCertificateDTO.aliasIssuer, configurationManager.getRootKeystorePassword().toCharArray(), configurationManager.getRootKeystorePassword().toCharArray());
         } catch (Exception e) {
-            issuer = keyStoreReader.readIssuerFromStore("src/main/resources/static/other-keystore.jks", createCertificateDTO.aliasIssuer, "password".toCharArray(), "password".toCharArray());
+            issuer = keyStoreReader.readIssuerFromStore(configurationManager.getOtherKeystorePath(), createCertificateDTO.aliasIssuer, configurationManager.getOtherKeystorePassword().toCharArray(), configurationManager.getOtherKeystorePassword().toCharArray());
 
         }
 
@@ -107,10 +111,10 @@ public class CertificateService implements ICertificateService {
         X509Certificate certificate = certConverter.getCertificate(certHolder);
 
         // Store certificate in key store
-        keyStoreWriter.loadKeyStore("src/main/resources/static/other-keystore.jks", "password".toCharArray());
+        keyStoreWriter.loadKeyStore(configurationManager.getOtherKeystorePath(), configurationManager.getOtherKeystorePassword().toCharArray());
         String alias = generateAlias(createCertificateDTO.subjectCN);
         keyStoreWriter.write(alias, issuer.getPrivateKey(), "password".toCharArray(), certificate);
-        keyStoreWriter.saveKeyStore("src/main/resources/static/other-keystore.jks", "password".toCharArray());
+        keyStoreWriter.saveKeyStore(configurationManager.getOtherKeystorePath(), configurationManager.getOtherKeystorePassword().toCharArray());
 
         return certificate;
     }
@@ -141,9 +145,9 @@ public class CertificateService implements ICertificateService {
         String alias = generateAlias(createCertificateDTO.subjectCN);
 
         // Store certificate in key store
-        keyStoreWriter.loadKeyStore("src/main/resources/static/root-keystore.jks", "password".toCharArray());
-        keyStoreWriter.write(alias, keyPair.getPrivate(), "password".toCharArray(), certificate);
-        keyStoreWriter.saveKeyStore("src/main/resources/static/root-keystore.jks", "password".toCharArray());
+        keyStoreWriter.loadKeyStore(configurationManager.getRootKeystorePath(), configurationManager.getRootKeystorePassword().toCharArray());
+        keyStoreWriter.write(alias, keyPair.getPrivate(), configurationManager.getRootKeystorePassword().toCharArray(), certificate);
+        keyStoreWriter.saveKeyStore(configurationManager.getRootKeystorePath(), configurationManager.getRootKeystorePassword().toCharArray());
 
         userService.assignCertificateToUser(alias, createCertificateDTO.userID);
 
@@ -171,36 +175,13 @@ public class CertificateService implements ICertificateService {
     }
 
     private List<Certificate> getAllCertificatesFromKeyStores() {
-        List<Certificate> certificates = new ArrayList<>();
-        try {
-            File directory = new File("src/main/resources/static");
-            File[] files = directory.listFiles();
+        List<Certificate> rootCertificates = keyStoreReader.getAllCertificatesFromKeyStore(configurationManager.getRootKeystorePath(), configurationManager.getRootKeystorePassword());
+        List<Certificate> otherCertificates = keyStoreReader.getAllCertificatesFromKeyStore(configurationManager.getOtherKeystorePath(), configurationManager.getOtherKeystorePassword());
 
-            for (File file : files) {
-                if (file.isFile() && file.getName().endsWith(".jks")) {
-                    KeyStore keyStore = KeyStore.getInstance("JKS");
-                    FileInputStream fileInputStream = new FileInputStream(file);
-                    keyStore.load(fileInputStream, "password".toCharArray());
+        List<Certificate> allCertificates = new ArrayList<>(rootCertificates);
+        allCertificates.addAll(otherCertificates);
 
-                    Enumeration<String> aliases = keyStore.aliases();
-
-                    while (aliases.hasMoreElements()) {
-                        String alias = aliases.nextElement();
-                        Certificate certificate = keyStore.getCertificate(alias);
-
-//                        boolean hasMatchingCert = getNonRevokedCerts(userService.findAll()).stream()
-//                                .anyMatch(cert -> cert.getAlias().equals(alias));
-
-                        if (certificate instanceof X509Certificate) {
-                            certificates.add(certificate);
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("Greška pri učitavanju sertifikata.");
-        }
-        return certificates;
+        return allCertificates;
     }
 
     private static List<UserCertificate> getNonRevokedCerts(List<User> users) {
@@ -212,58 +193,23 @@ public class CertificateService implements ICertificateService {
     }
 
     private List<String> getAliasesFromKeyStore() {
-        List<String> retAliases = new ArrayList<>();
-        try {
-            File directory = new File("src/main/resources/static");
-            File[] files = directory.listFiles();
+        List<String> rootCertificatesAliases = keyStoreReader.getAllAliasesFromKeyStore(configurationManager.getRootKeystorePath(), configurationManager.getRootKeystorePassword());
+        List<String> otherCertificatesAliases = keyStoreReader.getAllAliasesFromKeyStore(configurationManager.getOtherKeystorePath(), configurationManager.getOtherKeystorePassword());
 
-            for (File file : files) {
-                if (file.isFile() && file.getName().endsWith(".jks")) {
-                    KeyStore keyStore = KeyStore.getInstance("JKS");
-                    FileInputStream fileInputStream = new FileInputStream(file);
-                    keyStore.load(fileInputStream, "password".toCharArray());
+        List<String> allCertificatesAliases = new ArrayList<>(rootCertificatesAliases);
+        allCertificatesAliases.addAll(otherCertificatesAliases);
 
-                    Enumeration<String> aliases = keyStore.aliases();
-                    while (aliases.hasMoreElements()) {
-                        String element = aliases.nextElement();
-                        retAliases.add(element);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("Greška pri učitavanju sertifikata.");
-        }
-        return retAliases;
+        return allCertificatesAliases;
     }
 
     private List<Certificate> getCertificatesByAliasesFromKeyStores(List<String> aliases) {
-        List<Certificate> certificates = new ArrayList<>();
-        try {
-            File directory = new File("src/main/resources/static");
-            File[] files = directory.listFiles();
+        List<Certificate> rootCertificates = keyStoreReader.getCertificatesFromKeyStoreByAliases(configurationManager.getRootKeystorePath(), configurationManager.getRootKeystorePassword(), aliases);
+        List<Certificate> otherCertificates = keyStoreReader.getCertificatesFromKeyStoreByAliases(configurationManager.getOtherKeystorePath(), configurationManager.getOtherKeystorePassword(), aliases);
 
-            for (File file : files) {
-                if (file.isFile() && file.getName().endsWith(".jks")) {
-                    KeyStore keyStore = KeyStore.getInstance("JKS");
-                    FileInputStream fileInputStream = new FileInputStream(file);
-                    keyStore.load(fileInputStream, "password".toCharArray());
+        List<Certificate> allCertificates = new ArrayList<>(rootCertificates);
+        allCertificates.addAll(otherCertificates);
 
-                    Enumeration<String> aliases2 = keyStore.aliases();
-
-                    for (String alias : Collections.list(aliases2)) {
-
-                        Certificate certificate = keyStore.getCertificate(alias);
-
-                        if (certificate instanceof X509Certificate && aliases.contains(alias)) {
-                            certificates.add(certificate);
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("Greška pri učitavanju sertifikata.");
-        }
-        return certificates;
+        return allCertificates;
     }
 
     private List<CertificateDTO> mapCertificatesToDtos(List<Certificate> certificates, List<String> aliases) {

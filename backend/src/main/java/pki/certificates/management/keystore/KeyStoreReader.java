@@ -13,6 +13,9 @@ import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 
 @Component
 public class KeyStoreReader {
@@ -135,5 +138,79 @@ public class KeyStoreReader {
             e.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     * Ucitava sve sertifikate is KS fajla
+     */
+    public List<Certificate> getAllCertificatesFromKeyStore(String keyStoreFile, String keyStorePass) {
+        List<Certificate> certificates = new ArrayList<>();
+
+        try {
+            KeyStore ks = KeyStore.getInstance("JKS", "SUN");
+            BufferedInputStream in = new BufferedInputStream(new FileInputStream(keyStoreFile));
+            ks.load(in, keyStorePass.toCharArray());
+
+            Enumeration<String> aliases = ks.aliases();
+            while (aliases.hasMoreElements()) {
+                String alias = aliases.nextElement();
+                Certificate cert = ks.getCertificate(alias);
+                certificates.add(cert);
+            }
+        } catch (KeyStoreException | NoSuchProviderException |
+                 NoSuchAlgorithmException | CertificateException | IOException e) {
+            e.printStackTrace();
+        }
+
+        return certificates;
+    }
+
+    /**
+     * Ucitava sve sertifikate iz KS fajla po alijasima
+     */
+    public List<Certificate> getCertificatesFromKeyStoreByAliases(String keyStoreFile, String keyStorePass, List<String> aliases) {
+        List<Certificate> certificates = new ArrayList<>();
+
+        try {
+            KeyStore ks = KeyStore.getInstance("JKS", "SUN");
+            BufferedInputStream in = new BufferedInputStream(new FileInputStream(keyStoreFile));
+            ks.load(in, keyStorePass.toCharArray());
+
+            for (String alias : aliases) {
+                Certificate cert = ks.getCertificate(alias);
+                if (cert != null) {
+                    certificates.add(cert);
+                }
+            }
+        } catch (KeyStoreException | NoSuchProviderException |
+                 NoSuchAlgorithmException | CertificateException | IOException e) {
+            e.printStackTrace();
+        }
+
+        return certificates;
+    }
+
+    /**
+     * Ucitava sve alijase iz KS fajla
+     */
+    public List<String> getAllAliasesFromKeyStore(String keyStoreFile, String keyStorePass) {
+        List<String> aliases = new ArrayList<>();
+
+        try {
+            KeyStore ks = KeyStore.getInstance("JKS", "SUN");
+            BufferedInputStream in = new BufferedInputStream(new FileInputStream(keyStoreFile));
+            ks.load(in, keyStorePass.toCharArray());
+
+            Enumeration<String> e = ks.aliases();
+            while (e.hasMoreElements()) {
+                String alias = e.nextElement();
+                aliases.add(alias);
+            }
+        } catch (KeyStoreException | NoSuchProviderException |
+                 NoSuchAlgorithmException | CertificateException | IOException ex) {
+            ex.printStackTrace();
+        }
+
+        return aliases;
     }
 }
