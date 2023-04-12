@@ -79,13 +79,12 @@ public class CertificateService implements ICertificateService {
         // Generate subject
         Subject subject = generateSubject(createCertificateDTO.subjectCN, createCertificateDTO.subjectO, createCertificateDTO.subjectOU, createCertificateDTO.subjectUN, createCertificateDTO.subjectCountry);
 
-        Issuer issuer = new Issuer();
-        Properties props = new Properties();
-        try {
-            issuer = keyStoreReader.readIssuerFromStore(configurationManager.getRootKeystorePath(), createCertificateDTO.aliasIssuer, configurationManager.getRootKeystorePassword().toCharArray(), configurationManager.getRootKeystorePassword().toCharArray());
-        } catch (Exception e) {
-            issuer = keyStoreReader.readIssuerFromStore(configurationManager.getOtherKeystorePath(), createCertificateDTO.aliasIssuer, configurationManager.getOtherKeystorePassword().toCharArray(), configurationManager.getOtherKeystorePassword().toCharArray());
+        Issuer issuer;
 
+        issuer = keyStoreReader.readIssuerFromStore(configurationManager.getRootKeystorePath(), createCertificateDTO.aliasIssuer, configurationManager.getRootKeystorePassword().toCharArray(), configurationManager.getRootKeystorePassword().toCharArray());
+
+        if(issuer == null) {
+            issuer = keyStoreReader.readIssuerFromStore(configurationManager.getOtherKeystorePath(), createCertificateDTO.aliasIssuer, configurationManager.getOtherKeystorePassword().toCharArray(), configurationManager.getOtherKeystorePassword().toCharArray());
         }
 
         ContentSigner contentSigner = new JcaContentSignerBuilder("SHA256WithRSAEncryption").setProvider("BC").build(issuer.getPrivateKey());
