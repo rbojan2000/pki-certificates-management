@@ -1,0 +1,26 @@
+<div class="certificates-container">
+  <div class="certificate-card" *ngFor="let certificate of certificates">
+    <div class="card-content">
+      <h5>CA: {{ certificate.type }}</h5>
+      <h3 class="issuer">Issuer: {{ certificate.issuer }}</h3>
+      <br />
+      <p class="subject">Subject: {{ certificate.subject }}</p>
+    </div>
+    <div class="card-footer">
+      <div class="dates-container">
+        <p class="start-date">Start date: {{ certificate.startDate }}</p>
+        <p class="end-date">End date: {{ certificate.endDate }}</p>
+      </div>
+      <button *ngIf="certificate.alias !== 'my root ca'" [disabled]="certificate.isRevoked" class="revoke-button"
+        (click)="revokeCertificate(certificate.alias)">
+        Revoke
+      </button>
+      <button class="revoke-button" (click)="validateCertificate(certificate.alias)">
+        Validate
+      </button>
+      <button class="revoke-button" (click)="saveCertificate(certificate.alias)">
+        Save
+      </button>
+    </div>
+  </div>
+</div>
