@@ -1,5 +1,5 @@
 
-# PKI-Certificates-Management-System
+# pki-certificates-management
 
 ## Table of contents
 * [General info](#general-info)
