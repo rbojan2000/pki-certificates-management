@@ -18,7 +18,7 @@ Project is created with:
 
 
 ## Setup
-1. Clone this repository: git clone https://github.com/rbojan2000/PKI-Certificates-Management-System
+1. Clone this repository: git clone https://github.com/rbojan2000/pki-certificates-management
 2. Install backend dependencies: cd backend && mvn install
 3. Start the backend server: mvn spring-boot:run
 4. Install frontend dependencies: cd ../frontend && npm install
